@@ -1,4 +1,5 @@
-﻿namespace Daz_Content_Installer_V0._1
+﻿
+namespace Daz_Content_Installer_V0._1
 {
     partial class Main
     {
@@ -28,79 +29,600 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
+            BtnInputFolder = new Button();
+            CmboSelRuntime = new ComboBox();
+            BtnInstallContent = new Button();
+            Tab = new TabControl();
+            tabPage1 = new TabPage();
+            BtnClearList = new Button();
+            ChkShowLog = new CheckBox();
+            label4 = new Label();
+            BxShowRTPath = new TextBox();
+            progressBar1 = new ProgressBar();
+            label3 = new Label();
+            BxArchiveList = new TextBox();
+            BxMoveLocation = new TextBox();
+            BtnSelMoveFolder = new Button();
+            ChkMoveArchives = new CheckBox();
+            BtnSelZipFile = new Button();
+            LblSelRuntime = new Label();
+            tabPage2 = new TabPage();
+            label5 = new Label();
+            textBox1 = new TextBox();
+            BtnUninstallALL = new Button();
+            BtnShowFiles = new Button();
+            BtnSafeUninstall = new Button();
+            GrdArchiveList = new DataGridView();
+            BxArchiveSearch = new TextBox();
+            LblArchiveSearch = new Label();
+            BxWarning = new TextBox();
+            tabPage4 = new TabPage();
+            ListBoxRT = new ListBox();
             button2 = new Button();
-            comboBox1 = new ComboBox();
-            button3 = new Button();
-            button4 = new Button();
+            label1 = new Label();
+            label2 = new Label();
+            button1 = new Button();
+            BxRuntimeFolder = new TextBox();
+            BtnRuntimeBrowse = new Button();
+            BxRuntimeShortName = new TextBox();
+            tabPage3 = new TabPage();
+            BtnRestoreDB = new Button();
+            BtnBackupDB = new Button();
+            BxConsole = new TextBox();
+            saveDBDialog = new SaveFileDialog();
+            openZipFileDialog = new OpenFileDialog();
+            ArchiveFolderDialog = new FolderBrowserDialog();
+            RuntimeBrowserDialog = new FolderBrowserDialog();
+            moveBrowserDialog = new FolderBrowserDialog();
+            fileSystemWatcher1 = new FileSystemWatcher();
+            groupBox1 = new GroupBox();
+            label6 = new Label();
+            Tab.SuspendLayout();
+            tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)GrdArchiveList).BeginInit();
+            tabPage4.SuspendLayout();
+            tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)fileSystemWatcher1).BeginInit();
             SuspendLayout();
             // 
-            // button1
+            // BtnInputFolder
             // 
-            button1.Location = new Point(64, 80);
-            button1.Name = "button1";
-            button1.Size = new Size(301, 46);
-            button1.TabIndex = 0;
-            button1.Text = "Select Input Folder";
-            button1.UseVisualStyleBackColor = true;
+            BtnInputFolder.Location = new Point(5, 5);
+            BtnInputFolder.Margin = new Padding(2);
+            BtnInputFolder.Name = "BtnInputFolder";
+            BtnInputFolder.Size = new Size(232, 36);
+            BtnInputFolder.TabIndex = 0;
+            BtnInputFolder.Text = "Select Input Folder";
+            BtnInputFolder.UseVisualStyleBackColor = true;
+            BtnInputFolder.Click += BtnInputFolder_Click;
+            // 
+            // CmboSelRuntime
+            // 
+            CmboSelRuntime.FormattingEnabled = true;
+            CmboSelRuntime.Location = new Point(6, 305);
+            CmboSelRuntime.Margin = new Padding(2);
+            CmboSelRuntime.Name = "CmboSelRuntime";
+            CmboSelRuntime.Size = new Size(303, 33);
+            CmboSelRuntime.TabIndex = 2;
+            CmboSelRuntime.SelectedIndexChanged += CmboSelRuntime_SelectedIndexChanged;
+            CmboSelRuntime.Click += CmboSelRuntime_SelectedIndexChanged_1;
+            // 
+            // BtnInstallContent
+            // 
+            BtnInstallContent.Location = new Point(7, 416);
+            BtnInstallContent.Margin = new Padding(2);
+            BtnInstallContent.Name = "BtnInstallContent";
+            BtnInstallContent.Size = new Size(206, 36);
+            BtnInstallContent.TabIndex = 4;
+            BtnInstallContent.Text = "Install Content";
+            BtnInstallContent.UseVisualStyleBackColor = true;
+            BtnInstallContent.Click += BtnInstallContent_Click;
+            // 
+            // Tab
+            // 
+            Tab.Controls.Add(tabPage1);
+            Tab.Controls.Add(tabPage2);
+            Tab.Controls.Add(tabPage4);
+            Tab.Controls.Add(tabPage3);
+            Tab.Location = new Point(10, 12);
+            Tab.Name = "Tab";
+            Tab.SelectedIndex = 0;
+            Tab.Size = new Size(1003, 535);
+            Tab.TabIndex = 6;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(BtnClearList);
+            tabPage1.Controls.Add(ChkShowLog);
+            tabPage1.Controls.Add(label4);
+            tabPage1.Controls.Add(BxShowRTPath);
+            tabPage1.Controls.Add(progressBar1);
+            tabPage1.Controls.Add(label3);
+            tabPage1.Controls.Add(BxArchiveList);
+            tabPage1.Controls.Add(BxMoveLocation);
+            tabPage1.Controls.Add(BtnSelMoveFolder);
+            tabPage1.Controls.Add(ChkMoveArchives);
+            tabPage1.Controls.Add(BtnSelZipFile);
+            tabPage1.Controls.Add(LblSelRuntime);
+            tabPage1.Controls.Add(BtnInputFolder);
+            tabPage1.Controls.Add(BtnInstallContent);
+            tabPage1.Controls.Add(CmboSelRuntime);
+            tabPage1.Location = new Point(4, 34);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(995, 497);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "Install";
+            tabPage1.UseVisualStyleBackColor = true;
+            tabPage1.Click += tabPage1_Click;
+            // 
+            // BtnClearList
+            // 
+            BtnClearList.Location = new Point(877, 6);
+            BtnClearList.Name = "BtnClearList";
+            BtnClearList.Size = new Size(112, 34);
+            BtnClearList.TabIndex = 17;
+            BtnClearList.Text = "Clear List";
+            BtnClearList.UseVisualStyleBackColor = true;
+            BtnClearList.Click += BtnClearList_Click;
+            // 
+            // ChkShowLog
+            // 
+            ChkShowLog.AutoSize = true;
+            ChkShowLog.Checked = true;
+            ChkShowLog.CheckState = CheckState.Checked;
+            ChkShowLog.Location = new Point(218, 421);
+            ChkShowLog.Name = "ChkShowLog";
+            ChkShowLog.Size = new Size(151, 29);
+            ChkShowLog.TabIndex = 16;
+            ChkShowLog.Text = "Show Console";
+            ChkShowLog.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(314, 277);
+            label4.Name = "label4";
+            label4.Size = new Size(121, 25);
+            label4.TabIndex = 15;
+            label4.Text = "Runtime Path:";
+            // 
+            // BxShowRTPath
+            // 
+            BxShowRTPath.Location = new Point(314, 305);
+            BxShowRTPath.Name = "BxShowRTPath";
+            BxShowRTPath.Size = new Size(675, 31);
+            BxShowRTPath.TabIndex = 14;
+            BxShowRTPath.TextChanged += BxShowRTPath_TextChanged;
+            // 
+            // progressBar1
+            // 
+            progressBar1.Location = new Point(7, 457);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(983, 34);
+            progressBar1.TabIndex = 8;
+            progressBar1.Click += progressBar1_Click;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(6, 43);
+            label3.Name = "label3";
+            label3.Size = new Size(199, 25);
+            label3.TabIndex = 13;
+            label3.Text = "Archives to be installed:";
+            // 
+            // BxArchiveList
+            // 
+            BxArchiveList.BackColor = SystemColors.Control;
+            BxArchiveList.Location = new Point(6, 71);
+            BxArchiveList.Multiline = true;
+            BxArchiveList.Name = "BxArchiveList";
+            BxArchiveList.ReadOnly = true;
+            BxArchiveList.ScrollBars = ScrollBars.Both;
+            BxArchiveList.Size = new Size(983, 204);
+            BxArchiveList.TabIndex = 12;
+            BxArchiveList.WordWrap = false;
+            BxArchiveList.TextChanged += BxArchivesList_TextChanged;
+            // 
+            // BxMoveLocation
+            // 
+            BxMoveLocation.Location = new Point(158, 379);
+            BxMoveLocation.Name = "BxMoveLocation";
+            BxMoveLocation.Size = new Size(832, 31);
+            BxMoveLocation.TabIndex = 10;
+            BxMoveLocation.Visible = false;
+            BxMoveLocation.TextChanged += BxMoveLocation_TextChanged;
+            // 
+            // BtnSelMoveFolder
+            // 
+            BtnSelMoveFolder.Location = new Point(7, 377);
+            BtnSelMoveFolder.Name = "BtnSelMoveFolder";
+            BtnSelMoveFolder.Size = new Size(145, 34);
+            BtnSelMoveFolder.TabIndex = 9;
+            BtnSelMoveFolder.Text = "Move Location:";
+            BtnSelMoveFolder.UseVisualStyleBackColor = true;
+            BtnSelMoveFolder.Visible = false;
+            BtnSelMoveFolder.Click += BtnSelMoveFolder_Click;
+            // 
+            // ChkMoveArchives
+            // 
+            ChkMoveArchives.AutoSize = true;
+            ChkMoveArchives.Location = new Point(6, 343);
+            ChkMoveArchives.Name = "ChkMoveArchives";
+            ChkMoveArchives.Size = new Size(402, 29);
+            ChkMoveArchives.TabIndex = 8;
+            ChkMoveArchives.Text = "(Optional) Move successfully installed archives";
+            ChkMoveArchives.UseVisualStyleBackColor = true;
+            ChkMoveArchives.CheckedChanged += ChkMoveArchives_Changed;
+            // 
+            // BtnSelZipFile
+            // 
+            BtnSelZipFile.Location = new Point(252, 6);
+            BtnSelZipFile.Name = "BtnSelZipFile";
+            BtnSelZipFile.Size = new Size(203, 34);
+            BtnSelZipFile.TabIndex = 7;
+            BtnSelZipFile.Text = "Select Individual File(s)";
+            BtnSelZipFile.UseVisualStyleBackColor = true;
+            BtnSelZipFile.Click += BtnSelZipFile_Click;
+            // 
+            // LblSelRuntime
+            // 
+            LblSelRuntime.AutoSize = true;
+            LblSelRuntime.Location = new Point(6, 278);
+            LblSelRuntime.Name = "LblSelRuntime";
+            LblSelRuntime.Size = new Size(133, 25);
+            LblSelRuntime.TabIndex = 6;
+            LblSelRuntime.Text = "Select Runtime:";
+            LblSelRuntime.Click += LblSelRuntime_Click;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(label5);
+            tabPage2.Controls.Add(textBox1);
+            tabPage2.Controls.Add(BtnUninstallALL);
+            tabPage2.Controls.Add(BtnShowFiles);
+            tabPage2.Controls.Add(BtnSafeUninstall);
+            tabPage2.Controls.Add(GrdArchiveList);
+            tabPage2.Controls.Add(BxArchiveSearch);
+            tabPage2.Controls.Add(LblArchiveSearch);
+            tabPage2.Controls.Add(BxWarning);
+            tabPage2.Location = new Point(4, 34);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(995, 497);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "Uninstall";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(589, 21);
+            label5.Name = "label5";
+            label5.Size = new Size(168, 25);
+            label5.TabIndex = 8;
+            label5.Text = "File name to search:";
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(589, 49);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(400, 31);
+            textBox1.TabIndex = 7;
+            // 
+            // BtnUninstallALL
+            // 
+            BtnUninstallALL.Location = new Point(747, 453);
+            BtnUninstallALL.Name = "BtnUninstallALL";
+            BtnUninstallALL.Size = new Size(242, 34);
+            BtnUninstallALL.TabIndex = 5;
+            BtnUninstallALL.Text = "Uninstall ALL Files";
+            BtnUninstallALL.UseVisualStyleBackColor = true;
+            BtnUninstallALL.Click += BtnUninstallALL_Click;
+            // 
+            // BtnShowFiles
+            // 
+            BtnShowFiles.Location = new Point(19, 366);
+            BtnShowFiles.Name = "BtnShowFiles";
+            BtnShowFiles.Size = new Size(150, 34);
+            BtnShowFiles.TabIndex = 4;
+            BtnShowFiles.Text = "Show File list";
+            BtnShowFiles.UseVisualStyleBackColor = true;
+            BtnShowFiles.Click += BtnShowFiles_Click;
+            // 
+            // BtnSafeUninstall
+            // 
+            BtnSafeUninstall.Location = new Point(19, 413);
+            BtnSafeUninstall.Name = "BtnSafeUninstall";
+            BtnSafeUninstall.Size = new Size(150, 34);
+            BtnSafeUninstall.TabIndex = 3;
+            BtnSafeUninstall.Text = "Safe Uninstall";
+            BtnSafeUninstall.UseVisualStyleBackColor = true;
+            // 
+            // GrdArchiveList
+            // 
+            GrdArchiveList.BackgroundColor = SystemColors.Control;
+            GrdArchiveList.BorderStyle = BorderStyle.Fixed3D;
+            GrdArchiveList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            GrdArchiveList.Location = new Point(19, 86);
+            GrdArchiveList.Name = "GrdArchiveList";
+            GrdArchiveList.RowHeadersWidth = 62;
+            GrdArchiveList.RowTemplate.Height = 33;
+            GrdArchiveList.Size = new Size(970, 274);
+            GrdArchiveList.TabIndex = 2;
+            GrdArchiveList.CellContentClick += GrdArchiveList_CellContentClick;
+            // 
+            // BxArchiveSearch
+            // 
+            BxArchiveSearch.Location = new Point(19, 49);
+            BxArchiveSearch.Name = "BxArchiveSearch";
+            BxArchiveSearch.Size = new Size(400, 31);
+            BxArchiveSearch.TabIndex = 1;
+            // 
+            // LblArchiveSearch
+            // 
+            LblArchiveSearch.AutoSize = true;
+            LblArchiveSearch.Location = new Point(19, 21);
+            LblArchiveSearch.Name = "LblArchiveSearch";
+            LblArchiveSearch.Size = new Size(200, 25);
+            LblArchiveSearch.TabIndex = 0;
+            LblArchiveSearch.Text = "Archive name to search:";
+            // 
+            // BxWarning
+            // 
+            BxWarning.Location = new Point(423, 368);
+            BxWarning.Multiline = true;
+            BxWarning.Name = "BxWarning";
+            BxWarning.ReadOnly = true;
+            BxWarning.Size = new Size(566, 79);
+            BxWarning.TabIndex = 6;
+            BxWarning.Text = "WARNING: 'Unistall ALL Files' will remove all files, including any files that overwrote existing ones when installed. This may break other content or even Daz Studio. Use with caution!  ";
+            // 
+            // tabPage4
+            // 
+            tabPage4.Controls.Add(label6);
+            tabPage4.Controls.Add(groupBox1);
+            tabPage4.Controls.Add(ListBoxRT);
+            tabPage4.Controls.Add(button2);
+            tabPage4.Controls.Add(label1);
+            tabPage4.Controls.Add(label2);
+            tabPage4.Controls.Add(button1);
+            tabPage4.Controls.Add(BxRuntimeFolder);
+            tabPage4.Controls.Add(BtnRuntimeBrowse);
+            tabPage4.Controls.Add(BxRuntimeShortName);
+            tabPage4.Location = new Point(4, 34);
+            tabPage4.Name = "tabPage4";
+            tabPage4.Padding = new Padding(3);
+            tabPage4.Size = new Size(995, 497);
+            tabPage4.TabIndex = 3;
+            tabPage4.Text = "Manage Runtimes";
+            tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // ListBoxRT
+            // 
+            ListBoxRT.FormattingEnabled = true;
+            ListBoxRT.ItemHeight = 25;
+            ListBoxRT.Location = new Point(6, 142);
+            ListBoxRT.Name = "ListBoxRT";
+            ListBoxRT.Size = new Size(980, 279);
+            ListBoxRT.TabIndex = 18;
+            ListBoxRT.SelectedIndexChanged += ListBoxRT_SelectedIndexChanged;
             // 
             // button2
             // 
-            button2.Location = new Point(86, 164);
+            button2.Location = new Point(6, 427);
             button2.Name = "button2";
-            button2.Size = new Size(279, 46);
-            button2.TabIndex = 1;
-            button2.Text = "Select Output Folder";
+            button2.Size = new Size(121, 34);
+            button2.TabIndex = 17;
+            button2.Text = "Remove Runtime from list";
             button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
-            // comboBox1
+            // label1
             // 
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(88, 261);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(322, 40);
-            comboBox1.TabIndex = 2;
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 27);
+            label1.Name = "label1";
+            label1.Size = new Size(134, 25);
+            label1.TabIndex = 14;
+            label1.Text = "Runtime Name:";
             // 
-            // button3
+            // label2
             // 
-            button3.Location = new Point(442, 255);
-            button3.Name = "button3";
-            button3.Size = new Size(175, 46);
-            button3.TabIndex = 3;
-            button3.Text = "Add Runtime";
-            button3.UseVisualStyleBackColor = true;
+            label2.AutoSize = true;
+            label2.Location = new Point(6, 67);
+            label2.Name = "label2";
+            label2.Size = new Size(154, 25);
+            label2.TabIndex = 15;
+            label2.Text = "Runtime Location:";
             // 
-            // button4
+            // button1
             // 
-            button4.Location = new Point(97, 372);
-            button4.Name = "button4";
-            button4.Size = new Size(268, 46);
-            button4.TabIndex = 4;
-            button4.Text = "Install Content";
-            button4.UseVisualStyleBackColor = true;
+            button1.Location = new Point(851, 62);
+            button1.Name = "button1";
+            button1.Size = new Size(130, 34);
+            button1.TabIndex = 10;
+            button1.Text = "Add Runtime";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
+            // BxRuntimeFolder
+            // 
+            BxRuntimeFolder.Location = new Point(271, 64);
+            BxRuntimeFolder.Name = "BxRuntimeFolder";
+            BxRuntimeFolder.Size = new Size(574, 31);
+            BxRuntimeFolder.TabIndex = 11;
+            BxRuntimeFolder.TextChanged += BxRuntimeFolder_TextChanged;
+            // 
+            // BtnRuntimeBrowse
+            // 
+            BtnRuntimeBrowse.Location = new Point(166, 62);
+            BtnRuntimeBrowse.Name = "BtnRuntimeBrowse";
+            BtnRuntimeBrowse.Size = new Size(99, 34);
+            BtnRuntimeBrowse.TabIndex = 13;
+            BtnRuntimeBrowse.Text = "Browse";
+            BtnRuntimeBrowse.UseVisualStyleBackColor = true;
+            BtnRuntimeBrowse.Click += BtnRuntimeBrowse_Click;
+            // 
+            // BxRuntimeShortName
+            // 
+            BxRuntimeShortName.Location = new Point(271, 24);
+            BxRuntimeShortName.Name = "BxRuntimeShortName";
+            BxRuntimeShortName.Size = new Size(315, 31);
+            BxRuntimeShortName.TabIndex = 12;
+            BxRuntimeShortName.TextChanged += BxRuntimeShortName_TextChanged;
+            // 
+            // tabPage3
+            // 
+            tabPage3.Controls.Add(BtnRestoreDB);
+            tabPage3.Controls.Add(BtnBackupDB);
+            tabPage3.Location = new Point(4, 34);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(995, 497);
+            tabPage3.TabIndex = 2;
+            tabPage3.Text = "Database";
+            tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // BtnRestoreDB
+            // 
+            BtnRestoreDB.Location = new Point(173, 6);
+            BtnRestoreDB.Name = "BtnRestoreDB";
+            BtnRestoreDB.Size = new Size(265, 34);
+            BtnRestoreDB.TabIndex = 1;
+            BtnRestoreDB.Text = "Restore Database from Backup";
+            BtnRestoreDB.UseVisualStyleBackColor = true;
+            BtnRestoreDB.Click += BtnRestoreDB_Click;
+            // 
+            // BtnBackupDB
+            // 
+            BtnBackupDB.Location = new Point(3, 6);
+            BtnBackupDB.Name = "BtnBackupDB";
+            BtnBackupDB.Size = new Size(164, 34);
+            BtnBackupDB.TabIndex = 0;
+            BtnBackupDB.Text = "Backup Database";
+            BtnBackupDB.UseVisualStyleBackColor = true;
+            BtnBackupDB.Click += BtnBackupDB_Click;
+            // 
+            // BxConsole
+            // 
+            BxConsole.Location = new Point(10, 549);
+            BxConsole.Multiline = true;
+            BxConsole.Name = "BxConsole";
+            BxConsole.Size = new Size(999, 424);
+            BxConsole.TabIndex = 7;
+            BxConsole.TextChanged += BxConsole_TextChanged;
+            // 
+            // openZipFileDialog
+            // 
+            openZipFileDialog.FileName = "openZipFileDialog";
+            openZipFileDialog.FileOk += openZipDialog_FileOk;
+            // 
+            // ArchiveFolderDialog
+            // 
+            ArchiveFolderDialog.HelpRequest += ArchiveFolderDialog_HelpRequest;
+            // 
+            // fileSystemWatcher1
+            // 
+            fileSystemWatcher1.EnableRaisingEvents = true;
+            fileSystemWatcher1.SynchronizingObject = this;
+            // 
+            // groupBox1
+            // 
+            groupBox1.Location = new Point(559, 465);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(8, 8);
+            groupBox1.TabIndex = 19;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "groupBox1";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(133, 432);
+            label6.Name = "label6";
+            label6.Size = new Size(375, 25);
+            label6.TabIndex = 20;
+            label6.Text = "(Removes from list only. Does not affect files.)";
             // 
             // Main
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1150, 784);
-            Controls.Add(button4);
-            Controls.Add(button3);
-            Controls.Add(comboBox1);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            ClientSize = new Size(1016, 984);
+            Controls.Add(BxConsole);
+            Controls.Add(Tab);
+            Margin = new Padding(2);
             Name = "Main";
             Text = "Daz Studio Content Installer";
             Load += Form1_Load;
+            Tab.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
+            tabPage2.ResumeLayout(false);
+            tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)GrdArchiveList).EndInit();
+            tabPage4.ResumeLayout(false);
+            tabPage4.PerformLayout();
+            tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)fileSystemWatcher1).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
+
+
 
         #endregion
 
+        private Button BtnInputFolder;
+        private ComboBox CmboSelRuntime;
+        private Button BtnInstallContent;
+        private TabControl Tab;
+        private TabPage tabPage1;
+        private TextBox BxConsole;
+        private Label LblSelRuntime;
+        private TabPage tabPage2;
+        private Button BtnSafeUninstall;
+        private DataGridView GrdArchiveList;
+        private TextBox BxArchiveSearch;
+        private Label LblArchiveSearch;
+        private Button BtnUninstallALL;
+        private Button BtnShowFiles;
+        private TextBox BxWarning;
+        private TabPage tabPage3;
+        private Button BtnRestoreDB;
+        private Button BtnBackupDB;
+        private SaveFileDialog saveDBDialog;
+        private OpenFileDialog openZipFileDialog;
+        private FolderBrowserDialog ArchiveFolderDialog;
+        private ProgressBar progressBar1;
+        private Button BtnSelZipFile;
+        private TextBox BxMoveLocation;
+        private Button BtnSelMoveFolder;
+        private CheckBox ChkMoveArchives;
+        private TextBox BxArchiveList;
+        private TabPage tabPage4;
+        private Label label1;
+        private Label label2;
         private Button button1;
+        private TextBox BxRuntimeFolder;
+        private Button BtnRuntimeBrowse;
+        private TextBox BxRuntimeShortName;
         private Button button2;
-        private ComboBox comboBox1;
-        private Button button3;
-        private Button button4;
+        private FolderBrowserDialog RuntimeBrowserDialog;
+        private Label label3;
+        private CheckBox ChkShowLog;
+        private Label label4;
+        private TextBox BxShowRTPath;
+        private Label label5;
+        private TextBox textBox1;
+        private Button BtnClearList;
+        private FolderBrowserDialog moveBrowserDialog;
+        private ListBox ListBoxRT;
+        private FileSystemWatcher fileSystemWatcher1;
+        private Label label6;
+        private GroupBox groupBox1;
     }
 }
