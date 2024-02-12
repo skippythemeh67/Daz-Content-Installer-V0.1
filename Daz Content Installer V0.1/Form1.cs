@@ -45,9 +45,13 @@ namespace Daz_Content_Installer_V0._1
         static string inputFolder;
         static string destFolder;
         List<string> archiveFiles;
+        int archiveCount;
         string runtimeLocation;
         string moveFolder;
         string selectedRuntime;
+        List<string> errorList;
+        private List<string> fileListForSelectedArchive = new List<string>(); // Define a class-level variable to hold the file list
+        int archiveID;
 
 
         private static SQLiteConnection connection;
@@ -62,8 +66,9 @@ namespace Daz_Content_Installer_V0._1
         {
             // Call the DB init method for initialization
             InitDatabase();
+            CheckAndSwitchTabRuntimeEmpty(connection);
             PopulateListBox();
-
+            errorList = new List<string>();
 
             // Unsubscribe from the Load event to ensure it runs only once
             this.Load -= MainForm_Load;
@@ -75,12 +80,37 @@ namespace Daz_Content_Installer_V0._1
 
         private void Log(string message)
         {
-            // Update the bxConsole TextBox directly
+            if (BxConsole.InvokeRequired)
             {
+                // If we're not on the UI thread, marshal the call to the UI thread
+                BxConsole.BeginInvoke(new Action<string>(Log), message);
+            }
+            else
+            {
+                // If we're already on the UI thread, update the control directly
                 BxConsole.AppendText(message + Environment.NewLine);
             }
         }
 
+        private void CheckAndSwitchTabRuntimeEmpty(SQLiteConnection connection)
+        {
+            string tableName = "Runtimes";
+            string query = $"SELECT COUNT(*) FROM {tableName}";
+
+            using (SQLiteCommand command = new SQLiteCommand(query, connection))
+            {
+                int rowCount = Convert.ToInt32(command.ExecuteScalar());
+
+                if (rowCount == 0)
+                {
+                    // Show warning message to the user
+                    MessageBox.Show("No Runtimes configured!\n\nSwitching to the Runtime Management tab on launch.\n\nPlease add at least one Runtime.\n\n(This is normal if this is the first time you have run this application.)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Switch to a specific tab (assuming yourTabControl is the name of your TabControl)
+                    Tab.SelectTab(tabPage4); // Specify your desired tab page
+                }
+            }
+        }
         private void BtnInputFolder_Click(object sender, EventArgs e)
         {
             DialogResult result = ArchiveFolderDialog.ShowDialog();
@@ -97,6 +127,7 @@ namespace Daz_Content_Installer_V0._1
                 Log($"Temp Folder set to: {tempDirectory}");
                 Log($"Folder scan. Input folder is {inputFolder}");
                 archiveFiles = GetArchiveFiles(inputFolder);
+                archiveCount = archiveFiles.Count;
                 Log($"Number of Archives to process: {archiveFiles.Count}");
             }
         }
@@ -138,6 +169,8 @@ namespace Daz_Content_Installer_V0._1
         private void BtnClearList_Click(object sender, EventArgs e)
         {
             BxArchiveList.Text = "";
+            archiveFiles.Clear();
+            Log("Install List Cleared!");
         }
 
         private void BxArchivesList_TextChanged(object sender, EventArgs e)
@@ -145,10 +178,10 @@ namespace Daz_Content_Installer_V0._1
 
         }
 
-        private void GrdArchiveList_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
+        //private void GrdArchiveList_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        //{
 
-        }
+        //}
 
 
 
@@ -157,29 +190,96 @@ namespace Daz_Content_Installer_V0._1
 
         }
 
-        private void BtnInstallContent_Click(object sender, EventArgs e)
+        private async void BtnInstallContent_Click(object sender, EventArgs e)
         {
-            foreach (var archiveFile in archiveFiles)
-            {
-                ProcessFolder(archiveFile, inputFolder, destFolder);
-                // Move the file
-                if (ChkMoveArchives.Checked)
-                {
-                    string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
+            BtnInstallContent.Enabled = false;
 
-                    File.Move(archiveFile, destinationFilePath);
-                    Log($"{archiveFile} moved to {destinationFilePath}");
+            await Task.Run(() =>
+            {
+                int currentIteration = 0;
+
+                foreach (var archiveFile in archiveFiles)
+                {
+                    ProcessFolder(archiveFile, inputFolder, destFolder);
+                    // Move the file
+                    if (ChkMoveArchives.Checked)
+                    {
+                        string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
+
+                        File.Move(archiveFile, destinationFilePath);
+                        Log($"{archiveFile} moved to {destinationFilePath}");
+                    }
+                    // Increment the current iteration count
+                    currentIteration++;
+
+                    // Calculate the percentage of completion
+                    int progressPercentage = (int)((double)currentIteration / archiveCount * 100);
+
+                    // Report progress to the UI thread
+                    UpdateProgressBar(progressPercentage);
                 }
-            }
+            });
+            // Reset the progress bar after the task is completed
+            ResetProgressBar();
+
+            // Enable the button after the task is completed
+            BtnInstallContent.Enabled = true;
         }
 
+        // Method to update the progress bar value safely from any thread
+        private void UpdateProgressBar(int value)
+        {
+            if (ProgBar.InvokeRequired)
+            {
+                ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = value));
+            }
+            else
+            {
+                ProgBar.Value = value;
+            }
+        }
+        private void ResetProgressBar()
+        {
+            if (ProgBar.InvokeRequired)
+            {
+                ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = 0));
+            }
+            else
+            {
+                ProgBar.Value = 0;
+            }
+        }
         private void BtnShowFiles_Click(object sender, EventArgs e)
         {
-
+            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            GetSafeFileList();
+            Log($"SAFE File list for {selectedArchive}");
+                foreach (string fileName in fileListForSelectedArchive)
+                {
+                    Log($" {fileName}");
+                }
+            Log($"Files in List: {fileListForSelectedArchive.Count}");
+            Log($"Archive ID = {archiveID}");
         }
 
         private void BtnUninstallALL_Click(object sender, EventArgs e)
         {
+            GetAllFileList();
+            DialogResult result = MessageBox.Show($"You are about to remove {fileListForSelectedArchive.Count} files!\nAre you sure?", "Warning!", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.OK)
+            {
+                DeleteFiles(fileListForSelectedArchive);
+                DelAllFilesFromDB(archiveID);
+                DelArchiveFromDB(archiveID);
+                PopulateArchiveListbox();
+                archiveID = 0;
+                Log($"Archive ID = {archiveID}");
+            }
+            else if (result == DialogResult.Cancel)
+            {
+                return;
+            }
 
         }
 
@@ -376,29 +476,37 @@ namespace Daz_Content_Installer_V0._1
 
         public void ExtractFiles(string inputFilePath, string outputFolderPath)
         {
-            using (var archive = ArchiveFactory.Open(inputFilePath))
+            try
             {
-                foreach (var entry in archive.Entries)
+                using (var archive = ArchiveFactory.Open(inputFilePath))
                 {
-                    if (!entry.IsDirectory)
+                    foreach (var entry in archive.Entries)
                     {
-                        entry.WriteToDirectory(outputFolderPath, new ExtractionOptions()
+                        if (!entry.IsDirectory)
                         {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
+                            entry.WriteToDirectory(outputFolderPath, new ExtractionOptions()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true
+                            });
 
-                        if (IsArchiveFile(entry.Key))
-                        {
-                            string nestedArchivePath = Path.Combine(outputFolderPath, entry.Key);
-                            string nestedOutputFolder = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(entry.Key));
+                            if (IsArchiveFile(entry.Key))
+                            {
+                                string nestedArchivePath = Path.Combine(outputFolderPath, entry.Key);
+                                string nestedOutputFolder = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(entry.Key));
 
-                            Directory.CreateDirectory(nestedOutputFolder);
+                                Directory.CreateDirectory(nestedOutputFolder);
 
-                            ExtractFiles(nestedArchivePath, nestedOutputFolder);
+                                ExtractFiles(nestedArchivePath, nestedOutputFolder);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                // Catch any exceptions and add the error message to the error list
+                errorList.Add(ex.Message);
             }
         }
 
@@ -470,7 +578,7 @@ namespace Daz_Content_Installer_V0._1
                 return;
             }
 
-            using (SQLiteConnection connection = new SQLiteConnection($"Data Source=InstalledFiles.db;Version=3;"))
+            using (SQLiteConnection connection = new SQLiteConnection($"Data Source=InstallerFiles.db;Version=3;"))
             {
                 connection.Open();
 
@@ -518,7 +626,7 @@ namespace Daz_Content_Installer_V0._1
 
         public void InitDatabase()
         {
-            string databasePath = "InstalledFiles.db";
+            string databasePath = "InstallerFiles.db";
 
             if (!File.Exists(databasePath))
             {
@@ -538,22 +646,30 @@ namespace Daz_Content_Installer_V0._1
                 connection.Open();
 
                 string createArchivesTableQuery = @"
-            CREATE TABLE IF NOT EXISTS Archives (
-                ArchiveId INTEGER PRIMARY KEY,
-                ArchiveName TEXT,
-                DateInstalled DATETIME,
-                UNIQUE(ArchiveName)
+                CREATE TABLE IF NOT EXISTS Archives (
+                    ArchiveId INTEGER PRIMARY KEY,
+                    ArchiveName TEXT,
+                    DateInstalled DATETIME,
+                    UNIQUE(ArchiveName)
             );";
 
                 string createFilesTableQuery = @"
-            CREATE TABLE IF NOT EXISTS Files (
-                Id INTEGER PRIMARY KEY,
-                ArchiveId INTEGER,
-                FileName TEXT,
-                Overwritten INTEGER,
-                DateInstalled DATETIME,
-                FOREIGN KEY(ArchiveId) REFERENCES Archives(ArchiveId)
-            );";
+                CREATE TABLE IF NOT EXISTS Files (
+                    Id INTEGER PRIMARY KEY,
+                    ArchiveId INTEGER,
+                    FileName TEXT,
+                    Overwritten INTEGER,
+                    DateInstalled DATETIME,
+                    FOREIGN KEY(ArchiveId) REFERENCES Archives(ArchiveId)
+                );";
+
+                string createRuntimesTableQuery = @"
+                CREATE TABLE IF NOT EXISTS Runtimes (
+                    Id INTEGER PRIMARY KEY,
+                    RuntimeName TEXT,
+                    Location TEXT,
+                    UNIQUE(RuntimeName)
+                );";
 
                 using (SQLiteCommand command = new SQLiteCommand(createArchivesTableQuery, connection))
                 {
@@ -561,6 +677,11 @@ namespace Daz_Content_Installer_V0._1
                 }
 
                 using (SQLiteCommand command = new SQLiteCommand(createFilesTableQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+
+                using (SQLiteCommand command = new SQLiteCommand(createRuntimesTableQuery, connection))
                 {
                     command.ExecuteNonQuery();
                 }
@@ -698,6 +819,7 @@ namespace Daz_Content_Installer_V0._1
             }
 
             PopulateRTComboBox();
+            PopulateListBox();
         }
 
 
@@ -854,19 +976,19 @@ namespace Daz_Content_Installer_V0._1
                 {
                     string selectedColumn = columns[0]; // Select the second column (index 1)
                                                         // Use the selectedColumn as needed
-                    Console.WriteLine("Selected Column: " + selectedColumn);
+                    Log("Selected Column: " + selectedColumn);
                     selectedRuntime = selectedColumn;
                 }
                 else
                 {
                     // Handle case when selected value does not have two columns
-                    Console.WriteLine("Selected value does not have two columns.");
+                    Log("Selected value does not have two columns.");
                 }
             }
             else
             {
                 // Handle case when no item is selected
-                Console.WriteLine("No item is selected.");
+                Log("No item is selected.");
             }
         }
 
@@ -886,17 +1008,17 @@ namespace Daz_Content_Installer_V0._1
 
                     if (rowsAffected > 0)
                     {
-                        Console.WriteLine("Record deleted successfully.");
+                        Log("Record deleted successfully.");
                     }
                     else
                     {
-                        Console.WriteLine("No record found matching the selected runtime.");
+                        Log("No record found matching the selected runtime.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error deleting record: {ex.Message}");
+                Log($"Error deleting record: {ex.Message}");
             }
         }
 
@@ -906,6 +1028,414 @@ namespace Daz_Content_Installer_V0._1
             PopulateListBox();
             Log($"Runtime {selectedRuntime} removed from list");
         }
+
+        //private void BtnSaveSettings_Click(object sender, EventArgs e)
+        //{
+
+        //}
+
+        private void ChkShowLog_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ChkShowLog.Checked)
+            {
+                // Store the current location
+                Point currentLocation = this.Location;
+
+                // Resize the form to width 800 and height 600
+                this.Size = new Size(1037, 1037);
+
+                // Restore the current location
+                this.Location = currentLocation;
+            }
+            else if (!ChkMoveArchives.Checked)
+            {
+                Point currentLocation = this.Location;
+
+                // Resize the form to width 800 and height 600
+                this.Size = new Size(1037, 605);
+
+                // Restore the current location
+                this.Location = currentLocation;
+            }
+        }
+
+        private void BxArchiveSearch_TextChanged(object sender, EventArgs e)
+        {
+            PopulateArchiveListbox();
+        }
+
+        private void PopulateArchiveListbox()
+        {
+            string searchQuery = BxArchiveSearch.Text.Trim();
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                List<string> matchingArchives = SearchArchivesByName(searchQuery);
+
+                // Clear existing items in the ListBox
+                LstArchive.Items.Clear();
+
+                // Populate the ListBox with the matching archives
+                foreach (string archiveName in matchingArchives)
+                {
+                    LstArchive.Items.Add(archiveName);
+                }
+            }
+        }
+
+        private List<string> SearchArchivesByName(string searchTerm)
+        {
+            List<string> matchingArchives = new List<string>();
+
+            try
+            {
+                string query = @"
+            SELECT ArchiveName 
+            FROM Archives 
+            WHERE ArchiveName LIKE @SearchTerm";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Using parameters to prevent SQL injection
+                    command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string archiveName = reader.GetString(0);
+                            matchingArchives.Add(archiveName);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error searching archives by name: {ex.Message}");
+            }
+
+            return matchingArchives;
+        }
+
+        private void GetSafeFileList()
+        {
+            // Clear existing items in the list variable
+            fileListForSelectedArchive.Clear();
+
+            // Retrieve the selected archive name from the ListBox
+            string selectedArchive = LstArchive.SelectedItem?.ToString();
+
+            if (!string.IsNullOrEmpty(selectedArchive))
+            {
+                fileListForSelectedArchive = GetSafeFileListForArchive(selectedArchive);
+                archiveID = GetArchiveId(selectedArchive);
+                
+            }
+             
+        }
+
+        private void GetAllFileList()
+        {
+            // Clear existing items in the list variable
+            fileListForSelectedArchive.Clear();
+
+            // Retrieve the selected archive name from the ListBox
+            string selectedArchive = LstArchive.SelectedItem?.ToString();
+
+            if (!string.IsNullOrEmpty(selectedArchive))
+            {
+                fileListForSelectedArchive = GetFullFileListForArchive(selectedArchive);
+                archiveID = GetArchiveId(selectedArchive);
+            }
+        }
+
+        private List<string> GetSafeFileListForArchive(string archiveName)
+        {
+            List<string> fileList = new List<string>();
+
+            try
+            {
+                string query = @"
+            SELECT FileName 
+            FROM Files 
+            WHERE ArchiveId = (
+                SELECT ArchiveId 
+                FROM Archives 
+                WHERE ArchiveName = @ArchiveName
+            ) 
+            AND Overwritten = 0";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Using parameters to prevent SQL injection
+                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
+
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string fileName = reader.GetString(0);
+                            fileList.Add(fileName);
+                        }
+                    }
+                }
+                ClearLog();
+                fileListForSelectedArchive = fileList;
+                //Log($"SAFE File list for {archiveName}:");
+                //foreach (string fileName in fileListForSelectedArchive)
+                //{
+                //    Log($" {fileName}");
+                //}
+                //Log($"Files in List: {fileListForSelectedArchive.Count}");
+            }
+            catch (Exception ex)
+            {
+                Log($"Error retrieving file list for archive '{archiveName}': {ex.Message}");
+            }
+
+            return fileList;
+        }
+
+        private List<string> GetFullFileListForArchive(string archiveName)
+        {
+            List<string> fileList = new List<string>();
+
+            try
+            {
+                string query = @"
+            SELECT FileName 
+            FROM Files 
+            WHERE ArchiveId = (
+                SELECT ArchiveId 
+                FROM Archives 
+                WHERE ArchiveName = @ArchiveName
+            )";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Using parameters to prevent SQL injection
+                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
+
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string fileName = reader.GetString(0);
+                            fileList.Add(fileName);
+                        }
+                    }
+                }
+                fileListForSelectedArchive = fileList;
+                ClearLog();
+                //Log($"FULL File list for {archiveName}:");
+                //foreach (string fileName in fileList)
+                //{
+                //    Log($" {fileName}");
+                //}
+                //Log($"Files in List: {fileListForSelectedArchive.Count}");
+            }
+            catch (Exception ex)
+            {
+                Log($"Error retrieving file list for archive '{archiveName}': {ex.Message}");
+            }
+
+            return fileList;
+        }
+
+        private void BtnShowAllFiles_Click(object sender, EventArgs e)
+        {
+            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            GetAllFileList();
+            Log($"FULL File list for {selectedArchive}:");
+            foreach (string fileName in fileListForSelectedArchive)
+            {
+                Log($" {fileName}");
+            }
+            Log($"Files in List: {fileListForSelectedArchive.Count}");
+        }
+
+        private void DeleteFiles(List<string> fileList)
+        {
+            foreach (string filePath in fileList)
+            {
+                try
+                {
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                        Log($"Deleted file: {filePath}");
+                    }
+                    else
+                    {
+                        Log($"File does not exist: {filePath}");
+                    }
+                    
+                    
+
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error deleting file '{filePath}': {ex.Message}");
+                }
+            }
+            
+        }
+
+        private void BtnClearFileList_Click(object sender, EventArgs e)
+        {
+            fileListForSelectedArchive.Clear();
+            Log("File list Cleared!");
+            Log($"Files in List: {fileListForSelectedArchive.Count}");
+        }
+
+        private void ClearLog()
+        {
+            BxConsole.Text = string.Empty;
+        }
+
+        private void BtnSafeUninstall_Click(object sender, EventArgs e)
+        {
+            GetSafeFileList();
+            DialogResult result = MessageBox.Show($"You are about to remove {fileListForSelectedArchive.Count} files!\nAre you sure?", "Warning!", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.OK)
+            {
+                DeleteFiles(fileListForSelectedArchive);
+                DelSafeFilesFromDB(archiveID);
+                DelArchiveFromDB(archiveID);
+                PopulateArchiveListbox();
+                archiveID = 0;
+                Log($"Archive ID = {archiveID}");
+
+            }
+            else if (result == DialogResult.Cancel)
+            {
+                return;
+            }
+
+        }
+
+        private int GetArchiveId(string archiveName)
+        {
+            int archiveId = -1; // Default value if no record is found or an error occurs
+
+            try
+            {
+                string query = "SELECT ArchiveId FROM Archives WHERE ArchiveName = @ArchiveName;";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
+
+                    // connection.Open();
+
+                    object result = command.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        archiveId = Convert.ToInt32(result);
+                    }
+
+                    // connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error retrieving ArchiveId: {ex.Message}");
+            }
+
+            return archiveId;
+        }
+
+        private void DelSafeFilesFromDB (int archiveID)
+        {
+            try
+            {
+                string query = "DELETE FROM Files WHERE ArchiveID = @ArchiveID AND Overwritten = 0";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Add parameters to the command
+                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                    // Execute the command
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        Log("Record deleted successfully.");
+                    }
+                    else
+                    {
+                        Log("No record found matching the selected runtime.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error deleting record: {ex.Message}");
+            }
+        }
+
+        private void DelAllFilesFromDB(int archiveID)
+        {
+            try
+            {
+                string query = "DELETE FROM Files WHERE ArchiveID = @ArchiveID";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Add parameters to the command
+                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                    // Execute the command
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        Log("Record deleted successfully.");
+                    }
+                    else
+                    {
+                        Log("No record found matching the selected runtime.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error deleting record: {ex.Message}");
+            }
+        }
+        private void DelArchiveFromDB(int archiveID)
+        {
+            try
+            {
+                string query = "DELETE FROM Archives WHERE ArchiveID = @ArchiveID";
+
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    // Add parameters to the command
+                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                    // Execute the command
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        Log("Record deleted successfully.");
+                    }
+                    else
+                    {
+                        Log("No record found matching the selected runtime.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error deleting record: {ex.Message}");
+            }
+        }
+
     }
 
 }

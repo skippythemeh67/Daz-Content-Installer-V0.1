@@ -38,7 +38,7 @@ namespace Daz_Content_Installer_V0._1
             ChkShowLog = new CheckBox();
             label4 = new Label();
             BxShowRTPath = new TextBox();
-            progressBar1 = new ProgressBar();
+            ProgBar = new ProgressBar();
             label3 = new Label();
             BxArchiveList = new TextBox();
             BxMoveLocation = new TextBox();
@@ -47,16 +47,18 @@ namespace Daz_Content_Installer_V0._1
             BtnSelZipFile = new Button();
             LblSelRuntime = new Label();
             tabPage2 = new TabPage();
-            label5 = new Label();
-            textBox1 = new TextBox();
+            BtnClearFileList = new Button();
+            BtnShowAllFiles = new Button();
+            LstArchive = new ListBox();
             BtnUninstallALL = new Button();
             BtnShowFiles = new Button();
             BtnSafeUninstall = new Button();
-            GrdArchiveList = new DataGridView();
             BxArchiveSearch = new TextBox();
             LblArchiveSearch = new Label();
             BxWarning = new TextBox();
             tabPage4 = new TabPage();
+            label6 = new Label();
+            groupBox1 = new GroupBox();
             ListBoxRT = new ListBox();
             button2 = new Button();
             label1 = new Label();
@@ -66,8 +68,10 @@ namespace Daz_Content_Installer_V0._1
             BtnRuntimeBrowse = new Button();
             BxRuntimeShortName = new TextBox();
             tabPage3 = new TabPage();
-            BtnRestoreDB = new Button();
+            textBox2 = new TextBox();
+            label7 = new Label();
             BtnBackupDB = new Button();
+            BtnRestoreDB = new Button();
             BxConsole = new TextBox();
             saveDBDialog = new SaveFileDialog();
             openZipFileDialog = new OpenFileDialog();
@@ -75,12 +79,9 @@ namespace Daz_Content_Installer_V0._1
             RuntimeBrowserDialog = new FolderBrowserDialog();
             moveBrowserDialog = new FolderBrowserDialog();
             fileSystemWatcher1 = new FileSystemWatcher();
-            groupBox1 = new GroupBox();
-            label6 = new Label();
             Tab.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)GrdArchiveList).BeginInit();
             tabPage4.SuspendLayout();
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)fileSystemWatcher1).BeginInit();
@@ -137,7 +138,7 @@ namespace Daz_Content_Installer_V0._1
             tabPage1.Controls.Add(ChkShowLog);
             tabPage1.Controls.Add(label4);
             tabPage1.Controls.Add(BxShowRTPath);
-            tabPage1.Controls.Add(progressBar1);
+            tabPage1.Controls.Add(ProgBar);
             tabPage1.Controls.Add(label3);
             tabPage1.Controls.Add(BxArchiveList);
             tabPage1.Controls.Add(BxMoveLocation);
@@ -172,12 +173,13 @@ namespace Daz_Content_Installer_V0._1
             ChkShowLog.AutoSize = true;
             ChkShowLog.Checked = true;
             ChkShowLog.CheckState = CheckState.Checked;
-            ChkShowLog.Location = new Point(218, 421);
+            ChkShowLog.Location = new Point(838, 423);
             ChkShowLog.Name = "ChkShowLog";
             ChkShowLog.Size = new Size(151, 29);
             ChkShowLog.TabIndex = 16;
             ChkShowLog.Text = "Show Console";
             ChkShowLog.UseVisualStyleBackColor = true;
+            ChkShowLog.CheckedChanged += ChkShowLog_CheckedChanged;
             // 
             // label4
             // 
@@ -192,17 +194,18 @@ namespace Daz_Content_Installer_V0._1
             // 
             BxShowRTPath.Location = new Point(314, 305);
             BxShowRTPath.Name = "BxShowRTPath";
+            BxShowRTPath.ReadOnly = true;
             BxShowRTPath.Size = new Size(675, 31);
             BxShowRTPath.TabIndex = 14;
             BxShowRTPath.TextChanged += BxShowRTPath_TextChanged;
             // 
-            // progressBar1
+            // ProgBar
             // 
-            progressBar1.Location = new Point(7, 457);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(983, 34);
-            progressBar1.TabIndex = 8;
-            progressBar1.Click += progressBar1_Click;
+            ProgBar.Location = new Point(7, 457);
+            ProgBar.Name = "ProgBar";
+            ProgBar.Size = new Size(983, 34);
+            ProgBar.TabIndex = 8;
+            ProgBar.Click += progressBar1_Click;
             // 
             // label3
             // 
@@ -251,9 +254,9 @@ namespace Daz_Content_Installer_V0._1
             ChkMoveArchives.AutoSize = true;
             ChkMoveArchives.Location = new Point(6, 343);
             ChkMoveArchives.Name = "ChkMoveArchives";
-            ChkMoveArchives.Size = new Size(402, 29);
+            ChkMoveArchives.Size = new Size(537, 29);
             ChkMoveArchives.TabIndex = 8;
-            ChkMoveArchives.Text = "(Optional) Move successfully installed archives";
+            ChkMoveArchives.Text = "(Optional) Move successfully installed archives to new location?";
             ChkMoveArchives.UseVisualStyleBackColor = true;
             ChkMoveArchives.CheckedChanged += ChkMoveArchives_Changed;
             // 
@@ -279,12 +282,12 @@ namespace Daz_Content_Installer_V0._1
             // 
             // tabPage2
             // 
-            tabPage2.Controls.Add(label5);
-            tabPage2.Controls.Add(textBox1);
+            tabPage2.Controls.Add(BtnClearFileList);
+            tabPage2.Controls.Add(BtnShowAllFiles);
+            tabPage2.Controls.Add(LstArchive);
             tabPage2.Controls.Add(BtnUninstallALL);
             tabPage2.Controls.Add(BtnShowFiles);
             tabPage2.Controls.Add(BtnSafeUninstall);
-            tabPage2.Controls.Add(GrdArchiveList);
             tabPage2.Controls.Add(BxArchiveSearch);
             tabPage2.Controls.Add(LblArchiveSearch);
             tabPage2.Controls.Add(BxWarning);
@@ -296,25 +299,38 @@ namespace Daz_Content_Installer_V0._1
             tabPage2.Text = "Uninstall";
             tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label5
+            // BtnClearFileList
             // 
-            label5.AutoSize = true;
-            label5.Location = new Point(589, 21);
-            label5.Name = "label5";
-            label5.Size = new Size(168, 25);
-            label5.TabIndex = 8;
-            label5.Text = "File name to search:";
+            BtnClearFileList.Location = new Point(19, 453);
+            BtnClearFileList.Name = "BtnClearFileList";
+            BtnClearFileList.Size = new Size(967, 34);
+            BtnClearFileList.TabIndex = 11;
+            BtnClearFileList.Text = "Clear List of Files";
+            BtnClearFileList.UseVisualStyleBackColor = true;
+            BtnClearFileList.Click += BtnClearFileList_Click;
             // 
-            // textBox1
+            // BtnShowAllFiles
             // 
-            textBox1.Location = new Point(589, 49);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(400, 31);
-            textBox1.TabIndex = 7;
+            BtnShowAllFiles.Location = new Point(747, 364);
+            BtnShowAllFiles.Name = "BtnShowAllFiles";
+            BtnShowAllFiles.Size = new Size(239, 34);
+            BtnShowAllFiles.TabIndex = 10;
+            BtnShowAllFiles.Text = "Show ALL Files";
+            BtnShowAllFiles.UseVisualStyleBackColor = true;
+            BtnShowAllFiles.Click += BtnShowAllFiles_Click;
+            // 
+            // LstArchive
+            // 
+            LstArchive.FormattingEnabled = true;
+            LstArchive.ItemHeight = 25;
+            LstArchive.Location = new Point(19, 95);
+            LstArchive.Name = "LstArchive";
+            LstArchive.Size = new Size(970, 254);
+            LstArchive.TabIndex = 9;
             // 
             // BtnUninstallALL
             // 
-            BtnUninstallALL.Location = new Point(747, 453);
+            BtnUninstallALL.Location = new Point(747, 411);
             BtnUninstallALL.Name = "BtnUninstallALL";
             BtnUninstallALL.Size = new Size(242, 34);
             BtnUninstallALL.TabIndex = 5;
@@ -328,7 +344,7 @@ namespace Daz_Content_Installer_V0._1
             BtnShowFiles.Name = "BtnShowFiles";
             BtnShowFiles.Size = new Size(150, 34);
             BtnShowFiles.TabIndex = 4;
-            BtnShowFiles.Text = "Show File list";
+            BtnShowFiles.Text = "Show Safe Files";
             BtnShowFiles.UseVisualStyleBackColor = true;
             BtnShowFiles.Click += BtnShowFiles_Click;
             // 
@@ -340,19 +356,7 @@ namespace Daz_Content_Installer_V0._1
             BtnSafeUninstall.TabIndex = 3;
             BtnSafeUninstall.Text = "Safe Uninstall";
             BtnSafeUninstall.UseVisualStyleBackColor = true;
-            // 
-            // GrdArchiveList
-            // 
-            GrdArchiveList.BackgroundColor = SystemColors.Control;
-            GrdArchiveList.BorderStyle = BorderStyle.Fixed3D;
-            GrdArchiveList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            GrdArchiveList.Location = new Point(19, 86);
-            GrdArchiveList.Name = "GrdArchiveList";
-            GrdArchiveList.RowHeadersWidth = 62;
-            GrdArchiveList.RowTemplate.Height = 33;
-            GrdArchiveList.Size = new Size(970, 274);
-            GrdArchiveList.TabIndex = 2;
-            GrdArchiveList.CellContentClick += GrdArchiveList_CellContentClick;
+            BtnSafeUninstall.Click += BtnSafeUninstall_Click;
             // 
             // BxArchiveSearch
             // 
@@ -360,6 +364,7 @@ namespace Daz_Content_Installer_V0._1
             BxArchiveSearch.Name = "BxArchiveSearch";
             BxArchiveSearch.Size = new Size(400, 31);
             BxArchiveSearch.TabIndex = 1;
+            BxArchiveSearch.TextChanged += BxArchiveSearch_TextChanged;
             // 
             // LblArchiveSearch
             // 
@@ -372,7 +377,8 @@ namespace Daz_Content_Installer_V0._1
             // 
             // BxWarning
             // 
-            BxWarning.Location = new Point(423, 368);
+            BxWarning.BackColor = Color.FromArgb(255, 255, 192);
+            BxWarning.Location = new Point(175, 366);
             BxWarning.Multiline = true;
             BxWarning.Name = "BxWarning";
             BxWarning.ReadOnly = true;
@@ -399,6 +405,24 @@ namespace Daz_Content_Installer_V0._1
             tabPage4.TabIndex = 3;
             tabPage4.Text = "Manage Runtimes";
             tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(133, 432);
+            label6.Name = "label6";
+            label6.Size = new Size(375, 25);
+            label6.TabIndex = 20;
+            label6.Text = "(Removes from list only. Does not affect files.)";
+            // 
+            // groupBox1
+            // 
+            groupBox1.Location = new Point(559, 465);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(8, 8);
+            groupBox1.TabIndex = 19;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "groupBox1";
             // 
             // ListBoxRT
             // 
@@ -476,29 +500,43 @@ namespace Daz_Content_Installer_V0._1
             // 
             // tabPage3
             // 
-            tabPage3.Controls.Add(BtnRestoreDB);
+            tabPage3.Controls.Add(textBox2);
+            tabPage3.Controls.Add(label7);
             tabPage3.Controls.Add(BtnBackupDB);
+            tabPage3.Controls.Add(BtnRestoreDB);
             tabPage3.Location = new Point(4, 34);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
             tabPage3.Size = new Size(995, 497);
             tabPage3.TabIndex = 2;
-            tabPage3.Text = "Database";
+            tabPage3.Text = "Database Backup";
             tabPage3.UseVisualStyleBackColor = true;
             // 
-            // BtnRestoreDB
+            // textBox2
             // 
-            BtnRestoreDB.Location = new Point(173, 6);
-            BtnRestoreDB.Name = "BtnRestoreDB";
-            BtnRestoreDB.Size = new Size(265, 34);
-            BtnRestoreDB.TabIndex = 1;
-            BtnRestoreDB.Text = "Restore Database from Backup";
-            BtnRestoreDB.UseVisualStyleBackColor = true;
-            BtnRestoreDB.Click += BtnRestoreDB_Click;
+            textBox2.BackColor = Color.FromArgb(255, 255, 192);
+            textBox2.Location = new Point(17, 160);
+            textBox2.Multiline = true;
+            textBox2.Name = "textBox2";
+            textBox2.ReadOnly = true;
+            textBox2.Size = new Size(972, 37);
+            textBox2.TabIndex = 3;
+            textBox2.Text = "For manual back-up copy the file 'InstallerFiles.db' from the application folder to another location.\r\n";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 9F, FontStyle.Italic, GraphicsUnit.Point);
+            label7.Location = new Point(17, 17);
+            label7.Name = "label7";
+            label7.Size = new Size(189, 25);
+            label7.TabIndex = 2;
+            label7.Text = "(Not implemented yet)";
             // 
             // BtnBackupDB
             // 
-            BtnBackupDB.Location = new Point(3, 6);
+            BtnBackupDB.Enabled = false;
+            BtnBackupDB.Location = new Point(17, 61);
             BtnBackupDB.Name = "BtnBackupDB";
             BtnBackupDB.Size = new Size(164, 34);
             BtnBackupDB.TabIndex = 0;
@@ -506,11 +544,23 @@ namespace Daz_Content_Installer_V0._1
             BtnBackupDB.UseVisualStyleBackColor = true;
             BtnBackupDB.Click += BtnBackupDB_Click;
             // 
+            // BtnRestoreDB
+            // 
+            BtnRestoreDB.Enabled = false;
+            BtnRestoreDB.Location = new Point(17, 101);
+            BtnRestoreDB.Name = "BtnRestoreDB";
+            BtnRestoreDB.Size = new Size(265, 34);
+            BtnRestoreDB.TabIndex = 1;
+            BtnRestoreDB.Text = "Restore Database from Backup";
+            BtnRestoreDB.UseVisualStyleBackColor = true;
+            BtnRestoreDB.Click += BtnRestoreDB_Click;
+            // 
             // BxConsole
             // 
             BxConsole.Location = new Point(10, 549);
             BxConsole.Multiline = true;
             BxConsole.Name = "BxConsole";
+            BxConsole.ScrollBars = ScrollBars.Vertical;
             BxConsole.Size = new Size(999, 424);
             BxConsole.TabIndex = 7;
             BxConsole.TextChanged += BxConsole_TextChanged;
@@ -529,29 +579,11 @@ namespace Daz_Content_Installer_V0._1
             fileSystemWatcher1.EnableRaisingEvents = true;
             fileSystemWatcher1.SynchronizingObject = this;
             // 
-            // groupBox1
-            // 
-            groupBox1.Location = new Point(559, 465);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(8, 8);
-            groupBox1.TabIndex = 19;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "groupBox1";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Location = new Point(133, 432);
-            label6.Name = "label6";
-            label6.Size = new Size(375, 25);
-            label6.TabIndex = 20;
-            label6.Text = "(Removes from list only. Does not affect files.)";
-            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1016, 984);
+            ClientSize = new Size(1015, 979);
             Controls.Add(BxConsole);
             Controls.Add(Tab);
             Margin = new Padding(2);
@@ -563,10 +595,10 @@ namespace Daz_Content_Installer_V0._1
             tabPage1.PerformLayout();
             tabPage2.ResumeLayout(false);
             tabPage2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)GrdArchiveList).EndInit();
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
             tabPage3.ResumeLayout(false);
+            tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)fileSystemWatcher1).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -585,7 +617,6 @@ namespace Daz_Content_Installer_V0._1
         private Label LblSelRuntime;
         private TabPage tabPage2;
         private Button BtnSafeUninstall;
-        private DataGridView GrdArchiveList;
         private TextBox BxArchiveSearch;
         private Label LblArchiveSearch;
         private Button BtnUninstallALL;
@@ -597,7 +628,7 @@ namespace Daz_Content_Installer_V0._1
         private SaveFileDialog saveDBDialog;
         private OpenFileDialog openZipFileDialog;
         private FolderBrowserDialog ArchiveFolderDialog;
-        private ProgressBar progressBar1;
+        private ProgressBar ProgBar;
         private Button BtnSelZipFile;
         private TextBox BxMoveLocation;
         private Button BtnSelMoveFolder;
@@ -616,13 +647,16 @@ namespace Daz_Content_Installer_V0._1
         private CheckBox ChkShowLog;
         private Label label4;
         private TextBox BxShowRTPath;
-        private Label label5;
-        private TextBox textBox1;
         private Button BtnClearList;
         private FolderBrowserDialog moveBrowserDialog;
         private ListBox ListBoxRT;
         private FileSystemWatcher fileSystemWatcher1;
         private Label label6;
         private GroupBox groupBox1;
+        private Label label7;
+        private TextBox textBox2;
+        private ListBox LstArchive;
+        private Button BtnShowAllFiles;
+        private Button BtnClearFileList;
     }
 }
