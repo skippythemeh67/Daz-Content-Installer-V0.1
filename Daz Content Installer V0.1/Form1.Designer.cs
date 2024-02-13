@@ -62,10 +62,10 @@ namespace Daz_Content_Installer_V0._1
             label6 = new Label();
             groupBox1 = new GroupBox();
             ListBoxRT = new ListBox();
-            button2 = new Button();
+            BtnRemoveRT = new Button();
             label1 = new Label();
             label2 = new Label();
-            button1 = new Button();
+            BtnAddRuntime = new Button();
             BxRuntimeFolder = new TextBox();
             BtnRuntimeBrowse = new Button();
             BxRuntimeShortName = new TextBox();
@@ -75,8 +75,8 @@ namespace Daz_Content_Installer_V0._1
             BtnBackupDB = new Button();
             BtnRestoreDB = new Button();
             BxConsole = new TextBox();
-            saveDBDialog = new SaveFileDialog();
-            openZipFileDialog = new OpenFileDialog();
+            SaveDBDialog = new SaveFileDialog();
+            OpenZipFileDialog = new OpenFileDialog();
             ArchiveFolderDialog = new FolderBrowserDialog();
             RuntimeBrowserDialog = new FolderBrowserDialog();
             moveBrowserDialog = new FolderBrowserDialog();
@@ -158,7 +158,7 @@ namespace Daz_Content_Installer_V0._1
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Install";
             tabPage1.UseVisualStyleBackColor = true;
-            tabPage1.Click += tabPage1_Click;
+            tabPage1.Click += TabPage1_Click;
             // 
             // BtnClearList
             // 
@@ -207,7 +207,7 @@ namespace Daz_Content_Installer_V0._1
             ProgBar.Name = "ProgBar";
             ProgBar.Size = new Size(983, 34);
             ProgBar.TabIndex = 8;
-            ProgBar.Click += progressBar1_Click;
+            ProgBar.Click += ProgressBar1_Click;
             // 
             // label3
             // 
@@ -405,10 +405,10 @@ namespace Daz_Content_Installer_V0._1
             tabPage4.Controls.Add(label6);
             tabPage4.Controls.Add(groupBox1);
             tabPage4.Controls.Add(ListBoxRT);
-            tabPage4.Controls.Add(button2);
+            tabPage4.Controls.Add(BtnRemoveRT);
             tabPage4.Controls.Add(label1);
             tabPage4.Controls.Add(label2);
-            tabPage4.Controls.Add(button1);
+            tabPage4.Controls.Add(BtnAddRuntime);
             tabPage4.Controls.Add(BxRuntimeFolder);
             tabPage4.Controls.Add(BtnRuntimeBrowse);
             tabPage4.Controls.Add(BxRuntimeShortName);
@@ -448,15 +448,15 @@ namespace Daz_Content_Installer_V0._1
             ListBoxRT.TabIndex = 18;
             ListBoxRT.SelectedIndexChanged += ListBoxRT_SelectedIndexChanged;
             // 
-            // button2
+            // BtnRemoveRT
             // 
-            button2.Location = new Point(6, 427);
-            button2.Name = "button2";
-            button2.Size = new Size(121, 34);
-            button2.TabIndex = 17;
-            button2.Text = "Remove Runtime from list";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            BtnRemoveRT.Location = new Point(6, 427);
+            BtnRemoveRT.Name = "BtnRemoveRT";
+            BtnRemoveRT.Size = new Size(121, 34);
+            BtnRemoveRT.TabIndex = 17;
+            BtnRemoveRT.Text = "Remove Runtime from list";
+            BtnRemoveRT.UseVisualStyleBackColor = true;
+            BtnRemoveRT.Click += BtnRemoveRT_Click;
             // 
             // label1
             // 
@@ -476,15 +476,15 @@ namespace Daz_Content_Installer_V0._1
             label2.TabIndex = 15;
             label2.Text = "Runtime Location:";
             // 
-            // button1
+            // BtnAddRuntime
             // 
-            button1.Location = new Point(851, 62);
-            button1.Name = "button1";
-            button1.Size = new Size(130, 34);
-            button1.TabIndex = 10;
-            button1.Text = "Add Runtime";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            BtnAddRuntime.Location = new Point(851, 62);
+            BtnAddRuntime.Name = "BtnAddRuntime";
+            BtnAddRuntime.Size = new Size(130, 34);
+            BtnAddRuntime.TabIndex = 10;
+            BtnAddRuntime.Text = "Add Runtime";
+            BtnAddRuntime.UseVisualStyleBackColor = true;
+            BtnAddRuntime.Click += BtnAddRuntime_Click;
             // 
             // BxRuntimeFolder
             // 
@@ -579,10 +579,10 @@ namespace Daz_Content_Installer_V0._1
             BxConsole.TabIndex = 7;
             BxConsole.TextChanged += BxConsole_TextChanged;
             // 
-            // openZipFileDialog
+            // OpenZipFileDialog
             // 
-            openZipFileDialog.FileName = "openZipFileDialog";
-            openZipFileDialog.FileOk += openZipDialog_FileOk;
+            OpenZipFileDialog.FileName = "openZipFileDialog";
+            OpenZipFileDialog.FileOk += OpenZipDialog_FileOk;
             // 
             // ArchiveFolderDialog
             // 
@@ -640,8 +640,8 @@ namespace Daz_Content_Installer_V0._1
         private TabPage tabPage3;
         private Button BtnRestoreDB;
         private Button BtnBackupDB;
-        private SaveFileDialog saveDBDialog;
-        private OpenFileDialog openZipFileDialog;
+        private SaveFileDialog SaveDBDialog;
+        private OpenFileDialog OpenZipFileDialog;
         private FolderBrowserDialog ArchiveFolderDialog;
         private ProgressBar ProgBar;
         private Button BtnSelZipFile;
@@ -652,11 +652,11 @@ namespace Daz_Content_Installer_V0._1
         private TabPage tabPage4;
         private Label label1;
         private Label label2;
-        private Button button1;
+        private Button BtnAddRuntime;
         private TextBox BxRuntimeFolder;
         private Button BtnRuntimeBrowse;
         private TextBox BxRuntimeShortName;
-        private Button button2;
+        private Button BtnRemoveRT;
         private FolderBrowserDialog RuntimeBrowserDialog;
         private Label label3;
         private CheckBox ChkShowLog;

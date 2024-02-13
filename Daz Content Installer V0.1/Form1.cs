@@ -7,7 +7,7 @@ namespace Daz_Content_Installer_V0._1
 {
     public partial class Main : Form
     {
-        private static List<string> specialFolders = new List<string>
+        private static readonly List<string> specialFolders = new()
         {
         "data",
         "people",
@@ -30,22 +30,22 @@ namespace Daz_Content_Installer_V0._1
         "Shaping",
         "Wearables"
          };
-        string newRuntimeFolder;
-        string newRTShortname;
-        static string folderLocation;
-        static string tempDirectory;
-        static string inputArchive;
-        static bool overWrite;
-        static string inputFolder;
-        static string destFolder;
-        List<string> archiveFiles;
-        int archiveCount;
-        string runtimeLocation;
-        string moveFolder;
-        string selectedRuntime;
-        List<string> errorList;
-        private List<string> fileListForSelectedArchive = new List<string>(); // Define a class-level variable to hold the file list
-        int archiveID;
+        private string newRuntimeFolder;
+        private string newRTShortname;
+        private static string folderLocation;
+        private static string tempDirectory;
+        private static string inputArchive;
+        private static readonly bool overWrite;
+        private static string inputFolder;
+        private static string destFolder;
+        private List<string> archiveFiles;
+        private int archiveCount;
+        private string runtimeLocation;
+        private string moveFolder;
+        private string selectedRuntime;
+        private List<string> errorList;
+        private List<string> fileListForSelectedArchive = new(); // Define a class-level variable to hold the file list
+        private int archiveID;
 
 
         private static SQLiteConnection connection;
@@ -53,7 +53,7 @@ namespace Daz_Content_Installer_V0._1
         public Main()
         {
             InitializeComponent();
-            this.Load += MainForm_Load; // Subscribe to the Load event
+            Load += MainForm_Load; // Subscribe to the Load event
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -67,7 +67,7 @@ namespace Daz_Content_Installer_V0._1
             errorList = new List<string>();
 
             // Unsubscribe from the Load event to ensure it runs only once
-            this.Load -= MainForm_Load;
+            Load -= MainForm_Load;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -78,7 +78,7 @@ namespace Daz_Content_Installer_V0._1
             if (BxConsole.InvokeRequired)
             {
                 // If we're not on the UI thread, marshal the call to the UI thread
-                BxConsole.BeginInvoke(new Action<string>(Log), message);
+                _ = BxConsole.BeginInvoke(new Action<string>(Log), message);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace Daz_Content_Installer_V0._1
             List<string> AllArchives = AllArchivesByName();
             foreach (string archiveName in AllArchives)
             {
-                LstArchive.Items.Add(archiveName);
+                _ = LstArchive.Items.Add(archiveName);
             }
         }
         private void CheckAndSwitchTabRuntimeEmpty(SQLiteConnection connection)
@@ -100,18 +100,16 @@ namespace Daz_Content_Installer_V0._1
             string tableName = "Runtimes";
             string query = $"SELECT COUNT(*) FROM {tableName}";
 
-            using (SQLiteCommand command = new SQLiteCommand(query, connection))
+            using SQLiteCommand command = new(query, connection);
+            int rowCount = Convert.ToInt32(command.ExecuteScalar());
+
+            if (rowCount == 0)
             {
-                int rowCount = Convert.ToInt32(command.ExecuteScalar());
+                // Show warning message to the user
+                _ = MessageBox.Show("No Runtimes configured!\n\nSwitching to the Runtime Management tab on launch.\n\nPlease add at least one Runtime.\n\n(This is normal if this is the first time you have run this application.)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                if (rowCount == 0)
-                {
-                    // Show warning message to the user
-                    MessageBox.Show("No Runtimes configured!\n\nSwitching to the Runtime Management tab on launch.\n\nPlease add at least one Runtime.\n\n(This is normal if this is the first time you have run this application.)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Switch to a specific tab (assuming yourTabControl is the name of your TabControl)
-                    Tab.SelectTab(tabPage4); // Specify your desired tab page
-                }
+                // Switch to a specific tab (assuming yourTabControl is the name of your TabControl)
+                Tab.SelectTab(tabPage4); // Specify your desired tab page
             }
         }
         private void BtnInputFolder_Click(object sender, EventArgs e)
@@ -149,15 +147,15 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnSelZipFile_Click(object sender, EventArgs e)
         {
-            openZipFileDialog.Filter = "Archive Files|*.zip;*.rar";
-            openZipFileDialog.Multiselect = true;
+            OpenZipFileDialog.Filter = "Archive Files|*.zip;*.rar";
+            OpenZipFileDialog.Multiselect = true;
 
-            DialogResult result = openZipFileDialog.ShowDialog();
+            DialogResult result = OpenZipFileDialog.ShowDialog();
 
             if (result == DialogResult.OK)
             {
                 // Get the selected file names and update zipFile
-                string[] selectedFiles = openZipFileDialog.FileNames;
+                string[] selectedFiles = OpenZipFileDialog.FileNames;
                 archiveFiles = new List<string>(selectedFiles);
                 BxArchiveList.Text = string.Join(NewLine, archiveFiles);
                 tempDirectory = Path.Combine(Path.GetDirectoryName(selectedFiles[0]), "Temp");
@@ -177,10 +175,6 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        private void BtnAddRuntime_Click(object sender, EventArgs e)
-        {
-
-        }
         private async void BtnInstallContent_Click(object sender, EventArgs e)
         {
             BtnInstallContent.Enabled = false;
@@ -189,7 +183,7 @@ namespace Daz_Content_Installer_V0._1
             {
                 int currentIteration = 0;
 
-                foreach (var archiveFile in archiveFiles)
+                foreach (string archiveFile in archiveFiles)
                 {
                     ProcessFolder(archiveFile, inputFolder, destFolder);
                     // Move the file
@@ -226,7 +220,7 @@ namespace Daz_Content_Installer_V0._1
 
             if (ProgBar.InvokeRequired)
             {
-                ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = safeValue));
+                _ = ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = safeValue));
             }
             else
             {
@@ -237,7 +231,7 @@ namespace Daz_Content_Installer_V0._1
         {
             if (ProgBar.InvokeRequired)
             {
-                ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = 0));
+                _ = ProgBar.Invoke((MethodInvoker)(() => ProgBar.Value = 0));
             }
             else
             {
@@ -246,7 +240,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnShowFiles_Click(object sender, EventArgs e)
         {
-            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            string? selectedArchive = LstArchive.SelectedItem?.ToString();
             GetSafeFileList();
             Log($"SAFE File list for {selectedArchive}");
             foreach (string fileName in fileListForSelectedArchive)
@@ -311,28 +305,26 @@ namespace Daz_Content_Installer_V0._1
 
 
                 // Get the selected runtime name from the combo box
-                string selectedRuntime = CmboSelRuntime.SelectedItem?.ToString();
+                string? selectedRuntime = CmboSelRuntime.SelectedItem?.ToString();
 
                 if (selectedRuntime != null)
                 {
                     // SQL query to select the Location from Runtimes table based on the selected runtime name
                     string query = "SELECT Location FROM Runtimes WHERE RuntimeName = @RuntimeName";
 
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@RuntimeName", selectedRuntime);
-                        runtimeLocation = command.ExecuteScalar()?.ToString();
+                    using SQLiteCommand command = new(query, connection);
+                    _ = command.Parameters.AddWithValue("@RuntimeName", selectedRuntime);
+                    runtimeLocation = command.ExecuteScalar()?.ToString();
 
-                        // Populate BxShowRTPath with the location if it's not null
-                        if (runtimeLocation != null)
-                        {
-                            BxShowRTPath.Text = runtimeLocation;
-                        }
-                        else
-                        {
-                            // Clear BxShowRTPath if no location is found
-                            BxShowRTPath.Text = "";
-                        }
+                    // Populate BxShowRTPath with the location if it's not null
+                    if (runtimeLocation != null)
+                    {
+                        BxShowRTPath.Text = runtimeLocation;
+                    }
+                    else
+                    {
+                        // Clear BxShowRTPath if no location is found
+                        BxShowRTPath.Text = "";
                     }
                 }
                 destFolder = runtimeLocation;
@@ -369,21 +361,17 @@ namespace Daz_Content_Installer_V0._1
                 // SQL query to select RuntimeName values from Runtimes table
                 string query = "SELECT RuntimeName FROM Runtimes";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                {
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        // Clear existing items in the ComboBox
-                        CmboSelRuntime.Items.Clear();
+                using SQLiteCommand command = new(query, connection);
+                using SQLiteDataReader reader = command.ExecuteReader();
+                // Clear existing items in the ComboBox
+                CmboSelRuntime.Items.Clear();
 
-                        // Iterate through the results and add each RuntimeName value to the ComboBox
-                        while (reader.Read())
-                        {
-                            // Assuming RuntimeName is a string
-                            string runtimeName = reader.GetString(0);
-                            CmboSelRuntime.Items.Add(runtimeName);
-                        }
-                    }
+                // Iterate through the results and add each RuntimeName value to the ComboBox
+                while (reader.Read())
+                {
+                    // Assuming RuntimeName is a string
+                    string runtimeName = reader.GetString(0);
+                    _ = CmboSelRuntime.Items.Add(runtimeName);
                 }
             }
             catch (Exception ex)
@@ -398,7 +386,7 @@ namespace Daz_Content_Installer_V0._1
             {
                 Log($"Processing Archive: {archiveName}");
                 string outputFolder = Path.Combine(tempDirectory, Path.GetFileNameWithoutExtension(archiveName));
-                Directory.CreateDirectory(outputFolder);
+                _ = Directory.CreateDirectory(outputFolder);
 
                 int archiveId = AddArchive(Path.GetFileNameWithoutExtension(archiveName), connection);
 
@@ -413,7 +401,7 @@ namespace Daz_Content_Installer_V0._1
 
                 List<string> contents = GetFolderContents(folderLocation);
                 Log("Contents of the special folder:");
-                foreach (var item in contents)
+                foreach (string item in contents)
                 {
                     Log(item);
                 }
@@ -427,25 +415,23 @@ namespace Daz_Content_Installer_V0._1
                 Log($"Error processing '{archiveName}': {ex.Message}");
             }
         }
-        public int AddArchive(string archiveName, SQLiteConnection connection)
+        static int AddArchive(string archiveName, SQLiteConnection connection)
         {
             string insertOrUpdateQuery = @"
         INSERT OR IGNORE INTO Archives (ArchiveName, DateInstalled) VALUES (@ArchiveName, @DateInstalled);
         UPDATE Archives SET DateInstalled = @DateInstalled WHERE ArchiveName = @ArchiveName;
         SELECT ArchiveId FROM Archives WHERE ArchiveName = @ArchiveName;";
 
-            using (SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection))
-            {
-                command.Parameters.AddWithValue("@ArchiveName", archiveName);
-                command.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
+            using SQLiteCommand command = new(insertOrUpdateQuery, connection);
+            _ = command.Parameters.AddWithValue("@ArchiveName", archiveName);
+            _ = command.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
 
-                return Convert.ToInt32(command.ExecuteScalar());
-            }
+            return Convert.ToInt32(command.ExecuteScalar());
         }
-        public List<string> GetArchiveFiles(string folderPath)
+        static List<string> GetArchiveFiles(string folderPath)
         {
-            var searchPatterns = new[] { "*.zip", "*.rar" };
-            var archiveFiles = searchPatterns
+            string[] searchPatterns = new[] { "*.zip", "*.rar" };
+            List<string> archiveFiles = searchPatterns
                 .SelectMany(pattern => Directory.GetFiles(folderPath, pattern))
                 .ToList();
 
@@ -455,27 +441,25 @@ namespace Daz_Content_Installer_V0._1
         {
             try
             {
-                using (var archive = ArchiveFactory.Open(inputFilePath))
+                using IArchive archive = ArchiveFactory.Open(inputFilePath);
+                foreach (IArchiveEntry entry in archive.Entries)
                 {
-                    foreach (var entry in archive.Entries)
+                    if (!entry.IsDirectory)
                     {
-                        if (!entry.IsDirectory)
+                        entry.WriteToDirectory(outputFolderPath, new ExtractionOptions()
                         {
-                            entry.WriteToDirectory(outputFolderPath, new ExtractionOptions()
-                            {
-                                ExtractFullPath = true,
-                                Overwrite = true
-                            });
+                            ExtractFullPath = true,
+                            Overwrite = true
+                        });
 
-                            if (IsArchiveFile(entry.Key))
-                            {
-                                string nestedArchivePath = Path.Combine(outputFolderPath, entry.Key);
-                                string nestedOutputFolder = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(entry.Key));
+                        if (IsArchiveFile(entry.Key))
+                        {
+                            string nestedArchivePath = Path.Combine(outputFolderPath, entry.Key);
+                            string nestedOutputFolder = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(entry.Key));
 
-                                Directory.CreateDirectory(nestedOutputFolder);
+                            _ = Directory.CreateDirectory(nestedOutputFolder);
 
-                                ExtractFiles(nestedArchivePath, nestedOutputFolder);
-                            }
+                            ExtractFiles(nestedArchivePath, nestedOutputFolder);
                         }
                     }
                 }
@@ -486,7 +470,7 @@ namespace Daz_Content_Installer_V0._1
                 errorList.Add(ex.Message);
             }
         }
-        public bool IsArchiveFile(string fileName)
+        static bool IsArchiveFile(string fileName)
         {
             string[] archiveExtensions = { ".zip", ".rar", ".7z" };
             string extension = Path.GetExtension(fileName).ToLower();
@@ -506,9 +490,9 @@ namespace Daz_Content_Installer_V0._1
                 }
             }
         }
-        public List<string> GetFolderContents(string folderPath)
+        static List<string> GetFolderContents(string folderPath)
         {
-            List<string> contents = new List<string>();
+            List<string> contents = new();
 
             if (Directory.Exists(folderPath))
             {
@@ -526,7 +510,7 @@ namespace Daz_Content_Installer_V0._1
 
                 if (!Directory.Exists(destinationPath))
                 {
-                    Directory.CreateDirectory(destinationPath);
+                    _ = Directory.CreateDirectory(destinationPath);
                 }
 
                 CopyAll(new DirectoryInfo(path), new DirectoryInfo(destinationPath), archiveId);
@@ -550,39 +534,37 @@ namespace Daz_Content_Installer_V0._1
                 return;
             }
 
-            using (SQLiteConnection connection = new SQLiteConnection($"Data Source=InstallerFiles.db;Version=3;"))
+            using SQLiteConnection connection = new($"Data Source=InstallerFiles.db;Version=3;");
+            connection.Open();
+
+            foreach (FileInfo fi in source.GetFiles())
             {
-                connection.Open();
 
-                foreach (FileInfo fi in source.GetFiles())
-                {
+                string namedFile = Path.Combine(target.FullName, fi.Name);
+                bool overWrite = File.Exists(namedFile);
+                Log($"Copying {fi.Name} to {target.FullName}");
 
-                    string namedFile = Path.Combine(target.FullName, fi.Name);
-                    bool overWrite = File.Exists(namedFile);
-                    Log($"Copying {fi.Name} to {target.FullName}");
+                _ = fi.CopyTo(namedFile, true);
 
-                    fi.CopyTo(namedFile, true);
+                InsertFileRecord(connection, archiveId, namedFile, overWrite);
+            }
 
-                    InsertFileRecord(connection, archiveId, namedFile, overWrite);
-                }
-
-                foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
-                {
-                    DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
-                    CopyAll(diSourceSubDir, nextTargetSubDir, archiveId);
-                }
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir, archiveId);
             }
         }
         public void DeleteFolderContents(string folderPath)
         {
             try
             {
-                foreach (var file in Directory.GetFiles(folderPath))
+                foreach (string file in Directory.GetFiles(folderPath))
                 {
                     File.Delete(file);
                 }
 
-                foreach (var subdirectory in Directory.GetDirectories(folderPath))
+                foreach (string subdirectory in Directory.GetDirectories(folderPath))
                 {
                     Directory.Delete(subdirectory, true);
                 }
@@ -594,7 +576,7 @@ namespace Daz_Content_Installer_V0._1
                 Log($"Error deleting folder contents: {ex.Message}");
             }
         }
-        public void InitDatabase()
+        static void InitDatabase()
         {
             string databasePath = "InstallerFiles.db";
 
@@ -606,15 +588,14 @@ namespace Daz_Content_Installer_V0._1
             connection = new SQLiteConnection($"Data Source={databasePath};Version=3;");
             connection.Open();
         }
-        public void CreateDatabase(string path)
+        static void CreateDatabase(string path)
         {
             SQLiteConnection.CreateFile(path);
 
-            using (SQLiteConnection connection = new SQLiteConnection($"Data Source={path};Version=3;"))
-            {
-                connection.Open();
+            using SQLiteConnection connection = new($"Data Source={path};Version=3;");
+            connection.Open();
 
-                string createArchivesTableQuery = @"
+            string createArchivesTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Archives (
                     ArchiveId INTEGER PRIMARY KEY,
                     ArchiveName TEXT,
@@ -622,7 +603,7 @@ namespace Daz_Content_Installer_V0._1
                     UNIQUE(ArchiveName)
             );";
 
-                string createFilesTableQuery = @"
+            string createFilesTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Files (
                     Id INTEGER PRIMARY KEY,
                     ArchiveId INTEGER,
@@ -632,7 +613,7 @@ namespace Daz_Content_Installer_V0._1
                     FOREIGN KEY(ArchiveId) REFERENCES Archives(ArchiveId)
                 );";
 
-                string createRuntimesTableQuery = @"
+            string createRuntimesTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Runtimes (
                     Id INTEGER PRIMARY KEY,
                     RuntimeName TEXT,
@@ -640,20 +621,19 @@ namespace Daz_Content_Installer_V0._1
                     UNIQUE(RuntimeName)
                 );";
 
-                using (SQLiteCommand command = new SQLiteCommand(createArchivesTableQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+            using (SQLiteCommand command = new(createArchivesTableQuery, connection))
+            {
+                _ = command.ExecuteNonQuery();
+            }
 
-                using (SQLiteCommand command = new SQLiteCommand(createFilesTableQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+            using (SQLiteCommand command = new(createFilesTableQuery, connection))
+            {
+                _ = command.ExecuteNonQuery();
+            }
 
-                using (SQLiteCommand command = new SQLiteCommand(createRuntimesTableQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
+            using (SQLiteCommand command = new(createRuntimesTableQuery, connection))
+            {
+                _ = command.ExecuteNonQuery();
             }
         }
         private void InsertFileRecord(SQLiteConnection connection, int archiveId, string fileName, bool overWritten)
@@ -661,40 +641,34 @@ namespace Daz_Content_Installer_V0._1
             try
             {
                 string selectQuery = "SELECT Id FROM Files WHERE ArchiveId = @ArchiveId AND FileName = @FileName;";
-                using (SQLiteCommand selectCommand = new SQLiteCommand(selectQuery, connection))
+                using SQLiteCommand selectCommand = new(selectQuery, connection);
+                _ = selectCommand.Parameters.AddWithValue("@ArchiveId", archiveId);
+                _ = selectCommand.Parameters.AddWithValue("@FileName", fileName);
+
+                object existingRecordId = selectCommand.ExecuteScalar();
+
+                if (existingRecordId != null)
                 {
-                    selectCommand.Parameters.AddWithValue("@ArchiveId", archiveId);
-                    selectCommand.Parameters.AddWithValue("@FileName", fileName);
+                    // If a record with the same ArchiveId and FileName exists, update it
+                    string updateQuery = "UPDATE Files SET DateInstalled = @DateInstalled WHERE Id = @Id;";
+                    using SQLiteCommand updateCommand = new(updateQuery, connection);
+                    // updateCommand.Parameters.AddWithValue("@Overwritten", overWritten ? 1 : 0);
+                    _ = updateCommand.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
+                    _ = updateCommand.Parameters.AddWithValue("@Id", existingRecordId);
 
-                    object existingRecordId = selectCommand.ExecuteScalar();
+                    _ = updateCommand.ExecuteNonQuery();
+                }
+                else
+                {
+                    // If no existing record, insert a new one
+                    string insertQuery = "INSERT INTO Files (ArchiveId, FileName, Overwritten, DateInstalled) VALUES (@ArchiveId, @FileName, @Overwritten, @DateInstalled);";
+                    using SQLiteCommand insertCommand = new(insertQuery, connection);
+                    _ = insertCommand.Parameters.AddWithValue("@ArchiveId", archiveId);
+                    _ = insertCommand.Parameters.AddWithValue("@FileName", fileName);
+                    _ = insertCommand.Parameters.AddWithValue("@Overwritten", overWritten ? 1 : 0);
+                    _ = insertCommand.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
 
-                    if (existingRecordId != null)
-                    {
-                        // If a record with the same ArchiveId and FileName exists, update it
-                        string updateQuery = "UPDATE Files SET DateInstalled = @DateInstalled WHERE Id = @Id;";
-                        using (SQLiteCommand updateCommand = new SQLiteCommand(updateQuery, connection))
-                        {
-                            // updateCommand.Parameters.AddWithValue("@Overwritten", overWritten ? 1 : 0);
-                            updateCommand.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
-                            updateCommand.Parameters.AddWithValue("@Id", existingRecordId);
-
-                            updateCommand.ExecuteNonQuery();
-                        }
-                    }
-                    else
-                    {
-                        // If no existing record, insert a new one
-                        string insertQuery = "INSERT INTO Files (ArchiveId, FileName, Overwritten, DateInstalled) VALUES (@ArchiveId, @FileName, @Overwritten, @DateInstalled);";
-                        using (SQLiteCommand insertCommand = new SQLiteCommand(insertQuery, connection))
-                        {
-                            insertCommand.Parameters.AddWithValue("@ArchiveId", archiveId);
-                            insertCommand.Parameters.AddWithValue("@FileName", fileName);
-                            insertCommand.Parameters.AddWithValue("@Overwritten", overWritten ? 1 : 0);
-                            insertCommand.Parameters.AddWithValue("@DateInstalled", DateTime.Now);
-
-                            insertCommand.ExecuteNonQuery();
-                        }
-                    }
+                    _ = insertCommand.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
@@ -708,37 +682,31 @@ namespace Daz_Content_Installer_V0._1
             string insertQuery = "INSERT INTO Runtimes (RuntimeName, Location) VALUES (@shortname, @rtFolder)";
             string updateQuery = "UPDATE Runtimes SET RuntimeName = @shortname WHERE Location = @rtFolder";
 
-            using (SQLiteCommand selectCommand = new SQLiteCommand(selectQuery, connection))
-            {
-                selectCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
-                int count = Convert.ToInt32(selectCommand.ExecuteScalar());
+            using SQLiteCommand selectCommand = new(selectQuery, connection);
+            _ = selectCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
+            int count = Convert.ToInt32(selectCommand.ExecuteScalar());
 
-                if (count == 0)
-                {
-                    // Record doesn't exist, perform insert
-                    using (SQLiteCommand insertCommand = new SQLiteCommand(insertQuery, connection))
-                    {
-                        insertCommand.Parameters.AddWithValue("@shortname", shortname);
-                        insertCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
-                else
-                {
-                    // Record exists, perform update
-                    using (SQLiteCommand updateCommand = new SQLiteCommand(updateQuery, connection))
-                    {
-                        updateCommand.Parameters.AddWithValue("@shortname", shortname);
-                        updateCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
-                        updateCommand.ExecuteNonQuery();
-                    }
-                }
+            if (count == 0)
+            {
+                // Record doesn't exist, perform insert
+                using SQLiteCommand insertCommand = new(insertQuery, connection);
+                _ = insertCommand.Parameters.AddWithValue("@shortname", shortname);
+                _ = insertCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
+                _ = insertCommand.ExecuteNonQuery();
+            }
+            else
+            {
+                // Record exists, perform update
+                using SQLiteCommand updateCommand = new(updateQuery, connection);
+                _ = updateCommand.Parameters.AddWithValue("@shortname", shortname);
+                _ = updateCommand.Parameters.AddWithValue("@rtFolder", rtFolder);
+                _ = updateCommand.ExecuteNonQuery();
             }
         }
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
+        //private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
+        //{
 
-        }
+        //}
         private void BxConsole_TextChanged(object sender, EventArgs e)
         {
 
@@ -747,7 +715,7 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        private void openZipDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        private void OpenZipDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
         }
@@ -755,7 +723,7 @@ namespace Daz_Content_Installer_V0._1
         {
             newRuntimeFolder = BxRuntimeFolder.Text;
         }
-        private void button1_Click(object sender, EventArgs e)
+        private void BtnAddRuntime_Click(object sender, EventArgs e)
         {
             if (newRuntimeFolder == "")
             {
@@ -788,53 +756,49 @@ namespace Daz_Content_Installer_V0._1
         {
             newRTShortname = ((TextBox)sender).Text;
         }
-        private void button3_Click(object sender, EventArgs e)
-        {
+        //private void button3_Click(object sender, EventArgs e)
+        //{
 
-        }
-        private void label1_Click(object sender, EventArgs e)
-        {
+        //}
+        //private void label1_Click(object sender, EventArgs e)
+        //{
 
-        }
-        private void label2_Click(object sender, EventArgs e)
-        {
+        //}
+        //private void label2_Click(object sender, EventArgs e)
+        //{
 
-        }
+        //}
         private void PopulateListBox()
         {
             try
             {
                 string query = "SELECT RuntimeName, Location FROM Runtimes"; // Select 'RuntimeName' and 'Location' columns
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                {
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        ListBoxRT.Items.Clear(); // Clear existing items in the ListBoxRT
+                using SQLiteCommand command = new(query, connection);
+                using SQLiteDataReader reader = command.ExecuteReader();
+                ListBoxRT.Items.Clear(); // Clear existing items in the ListBoxRT
 
-                        while (reader.Read())
-                        {
-                            // Assuming 'RuntimeName' is in the first column (index 0) and 'Location' is in the second column (index 1)
-                            if (!reader.IsDBNull(0) && !reader.IsDBNull(1)) // Check if both values are not NULL
-                            {
-                                string runtimeName = reader.GetString(0);
-                                string location = reader.GetString(1);
-                                string formattedItem = $"{runtimeName}\t\t\t{location}";
-                                ListBoxRT.Items.Add(formattedItem);
-                            }
-                        }
+                while (reader.Read())
+                {
+                    // Assuming 'RuntimeName' is in the first column (index 0) and 'Location' is in the second column (index 1)
+                    if (!reader.IsDBNull(0) && !reader.IsDBNull(1)) // Check if both values are not NULL
+                    {
+                        string runtimeName = reader.GetString(0);
+                        string location = reader.GetString(1);
+                        string formattedItem = $"{runtimeName}\t\t\t{location}";
+                        _ = ListBoxRT.Items.Add(formattedItem);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error populating ListBoxRT: {ex.Message}");
+                _ = MessageBox.Show($"Error populating ListBoxRT: {ex.Message}");
             }
         }
-        private void groupBox3_Enter(object sender, EventArgs e)
-        {
+        //private void groupBox3_Enter(object sender, EventArgs e)
+        //{
 
-        }
+        //}
         private void BtnRuntimeBrowse_Click_1(object sender, EventArgs e)
         {
 
@@ -851,10 +815,10 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        private void button1_Click_1(object sender, EventArgs e)
-        {
+        //private void button1_Click_1(object sender, EventArgs e)
+        //{
 
-        }
+        //}
         private void CmboSelRuntime_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 
@@ -867,22 +831,22 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        private void button4_Click(object sender, EventArgs e)
-        {
-            PopulateRTComboBox();
-        }
-        private void tabPage1_Click(object sender, EventArgs e)
-        {
-
-        }
-        private void progressBar1_Click(object sender, EventArgs e)
+        //private void button4_Click(object sender, EventArgs e)
+        //{
+        //    PopulateRTComboBox();
+        //}
+        private void TabPage1_Click(object sender, EventArgs e)
         {
 
         }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void ProgressBar1_Click(object sender, EventArgs e)
         {
 
         }
+        //private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        //{
+
+        //}
         private void ArchiveFolderDialog_HelpRequest(object sender, EventArgs e)
         {
 
@@ -923,22 +887,20 @@ namespace Daz_Content_Installer_V0._1
             {
                 string query = "DELETE FROM Runtimes WHERE RuntimeName = @RuntimeName";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                // Add parameters to the command
+                _ = command.Parameters.AddWithValue("@RuntimeName", selectedRuntime);
+
+                // Execute the command
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    // Add parameters to the command
-                    command.Parameters.AddWithValue("@RuntimeName", selectedRuntime);
-
-                    // Execute the command
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        Log("Record deleted successfully.");
-                    }
-                    else
-                    {
-                        Log("No record found matching the selected runtime.");
-                    }
+                    Log("Record deleted successfully.");
+                }
+                else
+                {
+                    Log("No record found matching the selected runtime.");
                 }
             }
             catch (Exception ex)
@@ -946,7 +908,7 @@ namespace Daz_Content_Installer_V0._1
                 Log($"Error deleting record: {ex.Message}");
             }
         }
-        private void button2_Click(object sender, EventArgs e)
+        private void BtnRemoveRT_Click(object sender, EventArgs e)
         {
             RemoveRuntime(selectedRuntime);
             PopulateListBox();
@@ -957,23 +919,23 @@ namespace Daz_Content_Installer_V0._1
             if (ChkShowLog.Checked)
             {
                 // Store the current location
-                Point currentLocation = this.Location;
+                Point currentLocation = Location;
 
                 // Resize the form to width 1037 and height 1037
-                this.Size = new Size(1037, 1037);
+                Size = new Size(1037, 1037);
 
                 // Restore the current location
-                this.Location = currentLocation;
+                Location = currentLocation;
             }
             else if (!ChkMoveArchives.Checked)
             {
-                Point currentLocation = this.Location;
+                Point currentLocation = Location;
 
                 // Resize the form to width 1037 and height 605
-                this.Size = new Size(1037, 605);
+                Size = new Size(1037, 605);
 
                 // Restore the current location
-                this.Location = currentLocation;
+                Location = currentLocation;
             }
         }
         private void BxArchiveSearch_TextChanged(object sender, EventArgs e)
@@ -994,14 +956,14 @@ namespace Daz_Content_Installer_V0._1
                 // Populate the ListBox with the matching archives
                 foreach (string archiveName in matchingArchives)
                 {
-                    LstArchive.Items.Add(archiveName);
+                    _ = LstArchive.Items.Add(archiveName);
                 }
             }
 
         }
         private List<string> SearchArchivesByName(string searchTerm)
         {
-            List<string> matchingArchives = new List<string>();
+            List<string> matchingArchives = new();
 
             try
             {
@@ -1010,19 +972,15 @@ namespace Daz_Content_Installer_V0._1
             FROM Archives 
             WHERE ArchiveName LIKE @SearchTerm";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                {
-                    // Using parameters to prevent SQL injection
-                    command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+                using SQLiteCommand command = new(query, connection);
+                // Using parameters to prevent SQL injection
+                _ = command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
 
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string archiveName = reader.GetString(0);
-                            matchingArchives.Add(archiveName);
-                        }
-                    }
+                using SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string archiveName = reader.GetString(0);
+                    matchingArchives.Add(archiveName);
                 }
             }
             catch (Exception ex)
@@ -1034,7 +992,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private List<string> AllArchivesByName()
         {
-            List<string> allArchives = new List<string>();
+            List<string> allArchives = new();
 
             try
             {
@@ -1042,17 +1000,13 @@ namespace Daz_Content_Installer_V0._1
                 SELECT ArchiveName 
                 FROM Archives
                 ORDER BY DateInstalled DESC;";
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                using SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
                 {
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            // Retrieve the value of the field from each row and add it to the list
-                            string value = reader.GetString(0); // Assuming the field is a string type
-                            allArchives.Add(value);
-                        }
-                    }
+                    // Retrieve the value of the field from each row and add it to the list
+                    string value = reader.GetString(0); // Assuming the field is a string type
+                    allArchives.Add(value);
                 }
             }
             catch (Exception ex)
@@ -1068,7 +1022,7 @@ namespace Daz_Content_Installer_V0._1
             fileListForSelectedArchive.Clear();
 
             // Retrieve the selected archive name from the ListBox
-            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            string? selectedArchive = LstArchive.SelectedItem?.ToString();
 
             if (!string.IsNullOrEmpty(selectedArchive))
             {
@@ -1084,7 +1038,7 @@ namespace Daz_Content_Installer_V0._1
             fileListForSelectedArchive.Clear();
 
             // Retrieve the selected archive name from the ListBox
-            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            string? selectedArchive = LstArchive.SelectedItem?.ToString();
 
             if (!string.IsNullOrEmpty(selectedArchive))
             {
@@ -1094,7 +1048,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private List<string> GetSafeFileListForArchive(string archiveName)
         {
-            List<string> fileList = new List<string>();
+            List<string> fileList = new();
 
             try
             {
@@ -1108,18 +1062,16 @@ namespace Daz_Content_Installer_V0._1
             ) 
             AND Overwritten = 0";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using (SQLiteCommand command = new(query, connection))
                 {
                     // Using parameters to prevent SQL injection
-                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
+                    _ = command.Parameters.AddWithValue("@ArchiveName", archiveName);
 
-                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    using SQLiteDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            string fileName = reader.GetString(0);
-                            fileList.Add(fileName);
-                        }
+                        string fileName = reader.GetString(0);
+                        fileList.Add(fileName);
                     }
                 }
                 ClearLog();
@@ -1140,7 +1092,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private List<string> GetFullFileListForArchive(string archiveName)
         {
-            List<string> fileList = new List<string>();
+            List<string> fileList = new();
 
             try
             {
@@ -1153,18 +1105,16 @@ namespace Daz_Content_Installer_V0._1
                 WHERE ArchiveName = @ArchiveName
             )";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using (SQLiteCommand command = new(query, connection))
                 {
                     // Using parameters to prevent SQL injection
-                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
+                    _ = command.Parameters.AddWithValue("@ArchiveName", archiveName);
 
-                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    using SQLiteDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            string fileName = reader.GetString(0);
-                            fileList.Add(fileName);
-                        }
+                        string fileName = reader.GetString(0);
+                        fileList.Add(fileName);
                     }
                 }
                 fileListForSelectedArchive = fileList;
@@ -1185,7 +1135,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnShowAllFiles_Click(object sender, EventArgs e)
         {
-            string selectedArchive = LstArchive.SelectedItem?.ToString();
+            string? selectedArchive = LstArchive.SelectedItem?.ToString();
             GetAllFileList();
             Log($"FULL File list for {selectedArchive}:");
             foreach (string fileName in fileListForSelectedArchive)
@@ -1259,21 +1209,19 @@ namespace Daz_Content_Installer_V0._1
             {
                 string query = "SELECT ArchiveId FROM Archives WHERE ArchiveName = @ArchiveName;";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                _ = command.Parameters.AddWithValue("@ArchiveName", archiveName);
+
+                // connection.Open();
+
+                object result = command.ExecuteScalar();
+
+                if (result != null && result != DBNull.Value)
                 {
-                    command.Parameters.AddWithValue("@ArchiveName", archiveName);
-
-                    // connection.Open();
-
-                    object result = command.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        archiveId = Convert.ToInt32(result);
-                    }
-
-                    // connection.Close();
+                    archiveId = Convert.ToInt32(result);
                 }
+
+                // connection.Close();
             }
             catch (Exception ex)
             {
@@ -1288,22 +1236,20 @@ namespace Daz_Content_Installer_V0._1
             {
                 string query = "DELETE FROM Files WHERE ArchiveID = @ArchiveID AND Overwritten = 0";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                // Add parameters to the command
+                _ = command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                // Execute the command
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    // Add parameters to the command
-                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
-
-                    // Execute the command
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        Log("Record deleted successfully.");
-                    }
-                    else
-                    {
-                        Log("No record found matching the selected runtime.");
-                    }
+                    Log("Record deleted successfully.");
+                }
+                else
+                {
+                    Log("No record found matching the selected runtime.");
                 }
             }
             catch (Exception ex)
@@ -1317,22 +1263,20 @@ namespace Daz_Content_Installer_V0._1
             {
                 string query = "DELETE FROM Files WHERE ArchiveID = @ArchiveID";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                // Add parameters to the command
+                _ = command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                // Execute the command
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    // Add parameters to the command
-                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
-
-                    // Execute the command
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        Log("Record deleted successfully.");
-                    }
-                    else
-                    {
-                        Log("No record found matching the selected runtime.");
-                    }
+                    Log("Record deleted successfully.");
+                }
+                else
+                {
+                    Log("No record found matching the selected runtime.");
                 }
             }
             catch (Exception ex)
@@ -1346,22 +1290,20 @@ namespace Daz_Content_Installer_V0._1
             {
                 string query = "DELETE FROM Archives WHERE ArchiveID = @ArchiveID";
 
-                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                using SQLiteCommand command = new(query, connection);
+                // Add parameters to the command
+                _ = command.Parameters.AddWithValue("@ArchiveID", archiveID);
+
+                // Execute the command
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
                 {
-                    // Add parameters to the command
-                    command.Parameters.AddWithValue("@ArchiveID", archiveID);
-
-                    // Execute the command
-                    int rowsAffected = command.ExecuteNonQuery();
-
-                    if (rowsAffected > 0)
-                    {
-                        Log("Record deleted successfully.");
-                    }
-                    else
-                    {
-                        Log("No record found matching the selected runtime.");
-                    }
+                    Log("Record deleted successfully.");
+                }
+                else
+                {
+                    Log("No record found matching the selected runtime.");
                 }
             }
             catch (Exception ex)
