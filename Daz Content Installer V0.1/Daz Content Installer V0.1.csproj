@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Dark HDD DAZ.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,10 @@
 
   <ItemGroup>
     <EmbeddedResource Remove="Form2.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Dark HDD DAZ.ico" />
   </ItemGroup>
 
   <ItemGroup>

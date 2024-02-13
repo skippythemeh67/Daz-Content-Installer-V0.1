@@ -29,6 +29,7 @@ namespace Daz_Content_Installer_V0._1
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             BtnInputFolder = new Button();
             CmboSelRuntime = new ComboBox();
             BtnInstallContent = new Button();
@@ -47,6 +48,7 @@ namespace Daz_Content_Installer_V0._1
             BtnSelZipFile = new Button();
             LblSelRuntime = new Label();
             tabPage2 = new TabPage();
+            BtnShowAll = new Button();
             BtnClearFileList = new Button();
             BtnShowAllFiles = new Button();
             LstArchive = new ListBox();
@@ -282,6 +284,7 @@ namespace Daz_Content_Installer_V0._1
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(BtnShowAll);
             tabPage2.Controls.Add(BtnClearFileList);
             tabPage2.Controls.Add(BtnShowAllFiles);
             tabPage2.Controls.Add(LstArchive);
@@ -298,6 +301,16 @@ namespace Daz_Content_Installer_V0._1
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Uninstall";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // BtnShowAll
+            // 
+            BtnShowAll.Location = new Point(815, 55);
+            BtnShowAll.Name = "BtnShowAll";
+            BtnShowAll.Size = new Size(171, 34);
+            BtnShowAll.TabIndex = 12;
+            BtnShowAll.Text = "Show All Archives";
+            BtnShowAll.UseVisualStyleBackColor = true;
+            BtnShowAll.Click += BtnShowAll_Click;
             // 
             // BtnClearFileList
             // 
@@ -327,6 +340,7 @@ namespace Daz_Content_Installer_V0._1
             LstArchive.Name = "LstArchive";
             LstArchive.Size = new Size(970, 254);
             LstArchive.TabIndex = 9;
+            LstArchive.SelectedIndexChanged += LstArchive_SelectedIndexChanged;
             // 
             // BtnUninstallALL
             // 
@@ -586,6 +600,7 @@ namespace Daz_Content_Installer_V0._1
             ClientSize = new Size(1015, 979);
             Controls.Add(BxConsole);
             Controls.Add(Tab);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(2);
             Name = "Main";
             Text = "Daz Studio Content Installer";
@@ -658,5 +673,6 @@ namespace Daz_Content_Installer_V0._1
         private ListBox LstArchive;
         private Button BtnShowAllFiles;
         private Button BtnClearFileList;
+        private Button BtnShowAll;
     }
 }
