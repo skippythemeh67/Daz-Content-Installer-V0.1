@@ -49,6 +49,7 @@ namespace Daz_Content_Installer_V0._1
         private int archiveID;
         private bool specialFolderFound;
         private bool archiveError;
+        List<string>? matchingFolders;
 
 
         private static SQLiteConnection? connection;
@@ -118,7 +119,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnInputFolder_Click(object sender, EventArgs e)
         {
-            
+
 
             DialogResult result = ArchiveFolderDialog.ShowDialog();
 
@@ -153,7 +154,7 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnSelZipFile_Click(object sender, EventArgs e)
         {
-            
+
 
             OpenZipFileDialog.Filter = "Archive Files|*.zip;*.rar";
             OpenZipFileDialog.Multiselect = true;
@@ -203,7 +204,7 @@ namespace Daz_Content_Installer_V0._1
         {
             errorList.Clear();
             BtnInstallContent.Enabled = false;
-            
+
             await Task.Run(() =>
             {
                 int currentIteration = 0;
@@ -213,19 +214,19 @@ namespace Daz_Content_Installer_V0._1
                     ProcessFolder(archiveFile, inputFolder, destFolder);
                     // Move the file
                     if (ChkMoveArchives.Checked)
-                        { 
-                            if (!archiveError)
-                            { 
-                                if (specialFolderFound)
-                                {
-                                    string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
+                    {
+                        if (!archiveError)
+                        {
+                            if (specialFolderFound)
+                            {
+                                string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
 
-                                    File.Move(archiveFile, destinationFilePath);
-                                    Log($"{archiveFile} moved to {destinationFilePath}");
-                                }
+                                File.Move(archiveFile, destinationFilePath);
+                                Log($"{archiveFile} moved to {destinationFilePath}");
                             }
-                     }
-                
+                        }
+                    }
+
                     // Increment the current iteration count
                     currentIteration++;
 
@@ -246,11 +247,11 @@ namespace Daz_Content_Installer_V0._1
             Log(" ");
             int errorCount = errorList.Count;
             Log($"Errors:\t{errorCount}");
-            foreach (var error in errorList) 
+            foreach (var error in errorList)
             {
                 Log($"  {error}\n");
             }
-            
+
         }
         // Method to update the progress bar value safely from any thread
         private void UpdateProgressBar(int value)
@@ -445,7 +446,7 @@ namespace Daz_Content_Installer_V0._1
                     Log($"Extraction completed successfully for '{archiveName}'.");
                     Log($"Special folder found at: {folderLocation}");
 
-                    List<string> contents = GetFolderContents(folderLocation);
+                    List<string> contents = GetFolderContents(matchingFolders);
                     Log("Contents of the Daz Folders:");
                     foreach (string item in contents)
                     {
@@ -530,27 +531,30 @@ namespace Daz_Content_Installer_V0._1
         {
             foreach (string specialFolder in specialFolders)
             {
-                string[] matchingFolders = Directory.GetDirectories(currentFolderPath, specialFolder, SearchOption.AllDirectories);
+                matchingFolders = new List<string>(Directory.GetDirectories(currentFolderPath, specialFolder, SearchOption.AllDirectories));
 
-                if (matchingFolders.Length > 0)
+                if (matchingFolders.Count > 0)
                 {
                     folderLocation = Path.GetDirectoryName(matchingFolders[0]);
-                    Log($"Debug: Special folder found at: {folderLocation}");
+                    Log($"Daz folder found at: {folderLocation}");
                     specialFolderFound = true;
                     return;
                 }
                 else specialFolderFound = false;
+                
             }
+
         }
-        static List<string> GetFolderContents(string folderPath)
+        static List<string> GetFolderContents(List<string> folderPath)
         {
             List<string> contents = new();
 
-            if (Directory.Exists(folderPath))
-            {
-                contents.AddRange(Directory.GetFiles(folderPath));
-                contents.AddRange(Directory.GetDirectories(folderPath));
-            }
+            foreach (string folder in folderPath)
+                if (Directory.Exists(folder))
+                {
+                contents.AddRange(Directory.GetFiles(Path.GetDirectoryName(folder)));
+                contents.AddRange(Directory.GetDirectories(Path.GetDirectoryName(folder)));
+                }
 
             return contents;
         }
@@ -1344,4 +1348,3 @@ namespace Daz_Content_Installer_V0._1
     }
 
 }
-
