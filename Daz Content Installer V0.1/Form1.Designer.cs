@@ -124,6 +124,7 @@ namespace Daz_Content_Installer_V0._1
             // 
             // Tab
             // 
+            Tab.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             Tab.Controls.Add(tabPage1);
             Tab.Controls.Add(tabPage2);
             Tab.Controls.Add(tabPage4);
@@ -172,6 +173,7 @@ namespace Daz_Content_Installer_V0._1
             // 
             // ChkShowLog
             // 
+            ChkShowLog.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             ChkShowLog.AutoSize = true;
             ChkShowLog.Checked = true;
             ChkShowLog.CheckState = CheckState.Checked;
@@ -220,6 +222,7 @@ namespace Daz_Content_Installer_V0._1
             // 
             // BxArchiveList
             // 
+            BxArchiveList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             BxArchiveList.BackColor = SystemColors.Control;
             BxArchiveList.Location = new Point(6, 71);
             BxArchiveList.Multiline = true;
@@ -571,11 +574,12 @@ namespace Daz_Content_Installer_V0._1
             // 
             // BxConsole
             // 
+            BxConsole.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             BxConsole.Location = new Point(10, 549);
             BxConsole.Multiline = true;
             BxConsole.Name = "BxConsole";
             BxConsole.ScrollBars = ScrollBars.Vertical;
-            BxConsole.Size = new Size(999, 424);
+            BxConsole.Size = new Size(999, 429);
             BxConsole.TabIndex = 7;
             BxConsole.TextChanged += BxConsole_TextChanged;
             // 

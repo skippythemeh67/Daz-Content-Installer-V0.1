@@ -3,6 +3,7 @@ using SharpCompress.Common;
 using System.Data.SQLite;
 using static System.Environment;
 
+
 namespace Daz_Content_Installer_V0._1
 {
     public partial class Main : Form
@@ -30,25 +31,27 @@ namespace Daz_Content_Installer_V0._1
         "Shaping",
         "Wearables"
          };
-        private string newRuntimeFolder;
-        private string newRTShortname;
-        private static string folderLocation;
-        private static string tempDirectory;
-        private static string inputArchive;
+        private string? newRuntimeFolder;
+        private string? newRTShortname;
+        private static string? folderLocation;
+        private static string? tempDirectory;
+        private static string? inputArchive;
         private static readonly bool overWrite;
-        private static string inputFolder;
-        private static string destFolder;
-        private List<string> archiveFiles;
+        private static string? inputFolder;
+        private static string? destFolder;
+        private List<string>? archiveFiles;
         private int archiveCount;
-        private string runtimeLocation;
-        private string moveFolder;
-        private string selectedRuntime;
-        private List<string> errorList;
+        private string? runtimeLocation;
+        private string? moveFolder;
+        private string? selectedRuntime;
+        private List<string>? errorList;
         private List<string> fileListForSelectedArchive = new(); // Define a class-level variable to hold the file list
         private int archiveID;
+        private bool specialFolderFound;
+        private bool archiveError;
 
 
-        private static SQLiteConnection connection;
+        private static SQLiteConnection? connection;
 
         public Main()
         {
@@ -65,6 +68,7 @@ namespace Daz_Content_Installer_V0._1
 
 
             errorList = new List<string>();
+            archiveCount = 0;
 
             // Unsubscribe from the Load event to ensure it runs only once
             Load -= MainForm_Load;
@@ -114,6 +118,8 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnInputFolder_Click(object sender, EventArgs e)
         {
+            
+
             DialogResult result = ArchiveFolderDialog.ShowDialog();
 
             if (result == DialogResult.OK)
@@ -147,6 +153,8 @@ namespace Daz_Content_Installer_V0._1
         }
         private void BtnSelZipFile_Click(object sender, EventArgs e)
         {
+            
+
             OpenZipFileDialog.Filter = "Archive Files|*.zip;*.rar";
             OpenZipFileDialog.Multiselect = true;
 
@@ -155,6 +163,7 @@ namespace Daz_Content_Installer_V0._1
             if (result == DialogResult.OK)
             {
                 // Get the selected file names and update zipFile
+
                 string[] selectedFiles = OpenZipFileDialog.FileNames;
                 archiveFiles = new List<string>(selectedFiles);
                 BxArchiveList.Text = string.Join(NewLine, archiveFiles);
@@ -175,10 +184,26 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        private async void BtnInstallContent_Click(object sender, EventArgs e)
-        {
-            BtnInstallContent.Enabled = false;
 
+        private void BtnInstallContent_Click(object sender, EventArgs e)
+        {
+            if (archiveFiles == null)
+            {
+                MessageBox.Show("No Archives Selected!\n\nSelect at least one archive to install to continue.)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(BxShowRTPath.Text))
+            {
+                MessageBox.Show("No Runtime Selected!\n\nSelect a runtime to continue.)", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            else InstallArchive();
+        }
+        private async void InstallArchive()
+        {
+            errorList.Clear();
+            BtnInstallContent.Enabled = false;
+            
             await Task.Run(() =>
             {
                 int currentIteration = 0;
@@ -188,12 +213,19 @@ namespace Daz_Content_Installer_V0._1
                     ProcessFolder(archiveFile, inputFolder, destFolder);
                     // Move the file
                     if (ChkMoveArchives.Checked)
-                    {
-                        string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
+                        { 
+                            if (!archiveError)
+                            { 
+                                if (specialFolderFound)
+                                {
+                                    string destinationFilePath = Path.Combine(moveFolder, Path.GetFileName(archiveFile));
 
-                        File.Move(archiveFile, destinationFilePath);
-                        Log($"{archiveFile} moved to {destinationFilePath}");
-                    }
+                                    File.Move(archiveFile, destinationFilePath);
+                                    Log($"{archiveFile} moved to {destinationFilePath}");
+                                }
+                            }
+                     }
+                
                     // Increment the current iteration count
                     currentIteration++;
 
@@ -211,6 +243,14 @@ namespace Daz_Content_Installer_V0._1
             // Enable the button after the task is completed
             BtnInstallContent.Enabled = true;
             Log("Operation complete!");
+            Log(" ");
+            int errorCount = errorList.Count;
+            Log($"Errors:\t{errorCount}");
+            foreach (var error in errorList) 
+            {
+                Log($"  {error}\n");
+            }
+            
         }
         // Method to update the progress bar value safely from any thread
         private void UpdateProgressBar(int value)
@@ -394,25 +434,34 @@ namespace Daz_Content_Installer_V0._1
                 inputArchive = Path.GetFileName(archiveName);
 
                 SearchSpecialFolders(outputFolder);
-
-                Log($"Output Folder: {outputFolder}");
-                Log($"Extraction completed successfully for '{archiveName}'.");
-                Log($"Special folder found at: {folderLocation}");
-
-                List<string> contents = GetFolderContents(folderLocation);
-                Log("Contents of the special folder:");
-                foreach (string item in contents)
+                if (!specialFolderFound)
                 {
-                    Log(item);
+                    errorList.Add("No Daz content folders found: " + archiveName);
                 }
 
-                MoveContentsToInput(contents, archiveId, outFolder);
+                else
+                {
+                    Log($"Output Folder: {outputFolder}");
+                    Log($"Extraction completed successfully for '{archiveName}'.");
+                    Log($"Special folder found at: {folderLocation}");
 
-                Log($"Move completed successfully for '{archiveName}'.");
+                    List<string> contents = GetFolderContents(folderLocation);
+                    Log("Contents of the Daz Folders:");
+                    foreach (string item in contents)
+                    {
+                        Log(item);
+                    }
+
+                    MoveContentsToInput(contents, archiveId, outFolder);
+
+                    Log($"Move completed successfully for '{archiveName}'.");
+                    archiveError = false;
+                }
             }
             catch (Exception ex)
             {
                 Log($"Error processing '{archiveName}': {ex.Message}");
+                archiveError = true;
             }
         }
         static int AddArchive(string archiveName, SQLiteConnection connection)
@@ -467,7 +516,8 @@ namespace Daz_Content_Installer_V0._1
             catch (Exception ex)
             {
                 // Catch any exceptions and add the error message to the error list
-                errorList.Add(ex.Message);
+                errorList.Add(inputFilePath + " " + ex.Message);
+                //errorList.Add(ex.Message);
             }
         }
         static bool IsArchiveFile(string fileName)
@@ -486,8 +536,10 @@ namespace Daz_Content_Installer_V0._1
                 {
                     folderLocation = Path.GetDirectoryName(matchingFolders[0]);
                     Log($"Debug: Special folder found at: {folderLocation}");
+                    specialFolderFound = true;
                     return;
                 }
+                else specialFolderFound = false;
             }
         }
         static List<string> GetFolderContents(string folderPath)
@@ -703,10 +755,6 @@ namespace Daz_Content_Installer_V0._1
                 _ = updateCommand.ExecuteNonQuery();
             }
         }
-        //private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        //{
-
-        //}
         private void BxConsole_TextChanged(object sender, EventArgs e)
         {
 
@@ -756,18 +804,6 @@ namespace Daz_Content_Installer_V0._1
         {
             newRTShortname = ((TextBox)sender).Text;
         }
-        //private void button3_Click(object sender, EventArgs e)
-        //{
-
-        //}
-        //private void label1_Click(object sender, EventArgs e)
-        //{
-
-        //}
-        //private void label2_Click(object sender, EventArgs e)
-        //{
-
-        //}
         private void PopulateListBox()
         {
             try
@@ -795,10 +831,6 @@ namespace Daz_Content_Installer_V0._1
                 _ = MessageBox.Show($"Error populating ListBoxRT: {ex.Message}");
             }
         }
-        //private void groupBox3_Enter(object sender, EventArgs e)
-        //{
-
-        //}
         private void BtnRuntimeBrowse_Click_1(object sender, EventArgs e)
         {
 
@@ -815,10 +847,6 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        //private void button1_Click_1(object sender, EventArgs e)
-        //{
-
-        //}
         private void CmboSelRuntime_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 
@@ -831,10 +859,6 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        //private void button4_Click(object sender, EventArgs e)
-        //{
-        //    PopulateRTComboBox();
-        //}
         private void TabPage1_Click(object sender, EventArgs e)
         {
 
@@ -843,10 +867,6 @@ namespace Daz_Content_Installer_V0._1
         {
 
         }
-        //private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        //{
-
-        //}
         private void ArchiveFolderDialog_HelpRequest(object sender, EventArgs e)
         {
 
@@ -1320,6 +1340,7 @@ namespace Daz_Content_Installer_V0._1
             LstArchive.Items.Clear();
             DefArchiveList();
         }
+
     }
 
 }
